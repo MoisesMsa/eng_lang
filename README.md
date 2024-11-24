@@ -1,6 +1,6 @@
 ### Compilação:
 
-```/gcc arquivo.l```
+```gcc arquivo.l```
 
 (checar se precisa usar as flags -ll ou -lfl)
 
