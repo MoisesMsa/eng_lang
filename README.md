@@ -1,8 +1,8 @@
 ### Compilação:
 
-'gcc arquivo.l'
-'gcc -ll arquivo.l'
-'gcc -lfl arquivo.l'
+```/gcc arquivo.l'```
+
+(checar se precisa usar a flag -ll ou -lfl)
 
 ### Execução
 ./a.out < entrada.txt
