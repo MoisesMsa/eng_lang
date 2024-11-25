@@ -1,6 +1,7 @@
 ### Compilação:
 
-```gcc arquivo.l```
+```flex lexer/lexer.l```
+```gcc lex.yy.c```
 
 (checar se precisa usar as flags -ll ou -lfl)
 
