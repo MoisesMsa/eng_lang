@@ -20,10 +20,10 @@
 "]"                   {printf("DBRACKET\n");}
 ":"                   {printf("COLON\n");}
 ";"                   {printf("SEMICOLON\n");}
-":="                  {printf("ASSIGNMENT\n");}
+"="                   {printf("ASSIGNMENT\n");}
 "+="                  {printf("PLUSEQUAL\n");}
 ","                   {printf("COMMA\n");}
-"="                   {printf("EQUALS\n");}
+"=="                  {printf("EQUALS\n");}
 "-"                   {printf("MINUS\n");}
 "+"                   {printf("PLUS\n");}
 "*"                   {printf("MULTIPLICATION\n");}
