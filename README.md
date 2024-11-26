@@ -1,9 +1,9 @@
 ### Compilação:
 
 ```flex lexer/lexer.l```
-```gcc lex.yy.c```
+```gcc lex.yy.c -o lexerApp```
 
 (checar se precisa usar as flags -ll ou -lfl)
 
 ### Execução
-```./a.out < entrada.txt```
+```./lexerApp < assets/test/mergesort.txt```
