@@ -5,4 +5,5 @@
 
 ### Execução
 ```./parser```
+Ou
 ```./parser < mergesort.c```
