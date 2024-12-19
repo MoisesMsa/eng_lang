@@ -13,7 +13,7 @@
   int tokenCount = 0;
 
   // Função para adicionar um token à lista
-  void addToken(const char *type, const char *value) {
+  void addToxken(const char *type, const char *value) {
       strcpy(tokens[tokenCount].type, type);
       strcpy(tokens[tokenCount].value, value);
       tokenCount++;
@@ -23,43 +23,51 @@
 %%
 
 [ \t\n]               ;
-[0-9]+                { addToken("NUMBER", yytext); }
-"begin"               { addToken("BEGIN", ""); }
-"end"                 { addToken("END", ""); }
-"do"                  { addToken("DO", ""); }
-[iI][fF]              { addToken("IF", ""); }
-"then"                { addToken("THEN", ""); }
-"else"                { addToken("ELSE", ""); }
-"("                   { addToken("LPARENTHESIS", ""); }
-")"                   { addToken("RPARENTHESIS", ""); }
-"{"                   { addToken("LKEY", ""); }
-"}"                   { addToken("DKEY", ""); }
-"["                   { addToken("LBRACKET", ""); }
-"]"                   { addToken("DBRACKET", ""); }
-":"                   { addToken("COLON", ""); }
-";"                   { addToken("SEMICOLON", ""); }
-"="                   { addToken("ASSIGNMENT", ""); }
-"+="                  { addToken("PLUSEQUAL", ""); }
-","                   { addToken("COMMA", ""); }
-"=="                  { addToken("EQUALS", ""); }
-"-"                   { addToken("MINUS", ""); }
-"+"                   { addToken("PLUS", ""); }
-"*"                   { addToken("MULTIPLICATION", ""); }
-"/"                   { addToken("DIVISION", ""); }
-"++"                  { addToken("INCREMENT", ""); }
-"<"                   { addToken("LESST", ""); }
-">"                   { addToken("GREATERT", ""); }
-"while"               { addToken("WHILE", ""); }
-"for"                 { addToken("FOR", ""); }
-"in"                  { addToken("IN", ""); }
-"def"                 { addToken("FUNCTION", ""); }
-"->"                  { addToken("ARROW", ""); }
-"int"|"void"|"float"|"double" { addToken("TYPE", yytext); }
-[a-zA-Z][a-zA-Z0-9]*  { addToken("ID", yytext); }
+[0-9]+                { yyval.sValue = strdup{yytext} 
+                        return NUMBER;}
+"begin"               { return(BEGIN); }
+"end"                 { return(END); }
+"do"                  { return(DO); }
+[iI][fF]              { return(IF); }
+"then"                { return(THEN); }
+"else"                { return(ELSE); }
+"("                   { return(yytext[0]); }
+")"                   { return(yytext[0]); }
+"{"                   { return(yytext[0]); }
+"}"                   { return(yytext[0]); }
+"["                   { return(yytext[0]); }
+"]"                   { return(yytext[0]); }
+":"                   { return(COLON); }
+";"                   { return(SEMICOLON); }
+"="                   { return(ASSIGN); }
+"+="                  { return(PLUSEQUAL); }
+","                   { return(COMMA); }
+"=="                  { return(EQUALS); }
+"-"                   { return(MINUS); }
+"+"                   { return(PLUS); }
+"*"                   { return(MULT); }
+"/"                   { return(DIVISION); }
+"++"                  { return(INCREMENT); }
+"<"                   { return(LESST); }
+">"                   { return(GREATERT); }
+"while"               { return(WHILE); }
+"for"                 { return(FOR); }
+"in"                  { return(IN); }
+"def"                 { return(FUNCTION); }
+"->"                  { return(ARROW); }
+"int"|"void"|"float"|"double" { yyval.sValue = strdup(yytext);
+                                return(TYPE); }
+[a-zA-Z][a-zA-Z0-9]*  { yyval.sValue = strdup(yytext);
+                        return(ID); }
 [\/\/.*]              { /* Ignorar comentários de linha única */ }
-.                     { addToken("INVALID", yytext); }
+.                     { yyval.sValue = strdup(yytext);
+                        return(INVALID); }
 
 %%
+
+#ifndef yywrap
+    int yywrap(void) {return 1;}
+#endif
 
 int main(void)
 {
