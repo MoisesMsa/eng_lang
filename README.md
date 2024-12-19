@@ -6,4 +6,4 @@
 ### Execução
 ```./parser```
 ou
-```./parser < mergesort.c```
+```./parser < /inputs/mergesort.c```
