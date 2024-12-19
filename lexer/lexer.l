@@ -13,7 +13,7 @@
   int tokenCount = 0;
 
   // Função para adicionar um token à lista
-  void addToxken(const char *type, const char *value) {
+  void addToken(const char *type, const char *value) {
       strcpy(tokens[tokenCount].type, type);
       strcpy(tokens[tokenCount].value, value);
       tokenCount++;
@@ -38,7 +38,7 @@
 "["                   { return(yytext[0]); }
 "]"                   { return(yytext[0]); }
 ":"                   { return(COLON); }
-";"                   { return(SEMICOLON); }
+";"                   { return(yytext[0]); }
 "="                   { return(ASSIGN); }
 "+="                  { return(PLUSEQUAL); }
 ","                   { return(COMMA); }
@@ -47,6 +47,7 @@
 "+"                   { return(PLUS); }
 "*"                   { return(MULT); }
 "/"                   { return(DIVISION); }
+"**"                  { return (EXPOENT); }
 "++"                  { return(INCREMENT); }
 "<"                   { return(LESST); }
 ">"                   { return(GREATERT); }
