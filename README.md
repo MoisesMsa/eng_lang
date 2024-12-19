@@ -1,12 +1,8 @@
 ### Compilação:
 
-```flex lexer/lexer.l```
-```gcc lex.yy.c -o lexerApp -lfl```
-
-(checar se precisa usar as flags -ll ou -lfl)
-
-```gcc interpretador.c -o interpretador```
+```make clean```
+```make```
 
 ### Execução
-```./lexerApp < assets/test/mergesort.txt > tokens.txt```
-```./interpretador```
+```./parser```
+```./parser < mergesort.c```
