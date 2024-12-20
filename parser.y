@@ -31,42 +31,89 @@ void yyerror(const char *s);
 }
 
 // Declaração dos tokens
-%token NUMBER FLOAT ID STRING
+%token NUMBER FLOAT ID STRING PRINT
 %token PLUS MINUS TIMES DIVIDE POWER
 %token ASSIGNMENT EQUALS NOTEQUALS LESSTHAN GREATERTHAN LESSEQUAL GREATEREQUAL
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON COMMA COLON
-%token INCREMENT DECREMENT
-
-// Definindo o token UMINUS para operador unário
-%token UMINUS
+%token INCREMENT DECREMENT FUNCTION WHILE IF ELSE DO FOR ARROW TYPE
+%token IN PLUSEQUAL
+%token UMINUS  // Token específico para tratar o operador unário '-'
 
 // Precedência e associatividade
-%right POWER        // Exponenciação, associatividade à direita
-%right ASSIGNMENT   // Atribuição, associatividade à direita
-%left TIMES DIVIDE  // Multiplicação e divisão
-%left PLUS MINUS    // Soma e subtração
+%right POWER           // Exponenciação
+%right ASSIGNMENT      // Atribuição
+%left TIMES DIVIDE     // Multiplicação e divisão
+%left PLUS MINUS       // Soma e subtração
+%left LESSTHAN LESSEQUAL GREATERTHAN GREATEREQUAL EQUALS NOTEQUALS
 
-%type <nval> statements statement expr term factor
+%type <nval> statements statement expr term factor condition block
+%type <sval> ID TYPE STRING
 
 %%
 
+// Regras da gramática
+
 statements:
     statement { 
-        printf("Statement: %s\n", $1->value);
         $$ = $1;
     }
     | statements statement {
-        printf("Statement: %s\n", $2->value);
-        $$ = $2;
+        $$ = mknode($1, $2, 0, "STATEMENTS");
     }
 ;
 
 statement:
-    expr { 
-        $$ = mknode($1, NULL, 0, "EXPRESSION"); 
+    expr SEMICOLON { 
+        $$ = mknode($1, NULL, 0, "EXPRESSION");
     }
-    | expr ASSIGNMENT expr { 
-        $$ = mknode($1, $3, ASSIGNMENT, "="); 
+    | ID ASSIGNMENT expr SEMICOLON { 
+        $$ = mknode(mknode(NULL, NULL, ID, $1), $3, ASSIGNMENT, "=");
+    }
+    | IF condition block { 
+        $$ = mknode($2, $3, IF, "IF");
+    }
+    | IF condition block ELSE block { 
+        $$ = mknode($2, mknode($3, $5, ELSE, "ELSE"), IF, "IF");
+    }
+    | WHILE condition DO block { 
+        $$ = mknode($2, $4, WHILE, "WHILE");
+    }
+    | FOR LPAREN statement condition SEMICOLON expr RPAREN block { 
+        $$ = mknode(mknode($3, mknode($4, $6, 0, "FOR CONDITION"), 0, "FOR INIT"), $8, FOR, "FOR");
+    }
+    | FUNCTION ID LPAREN RPAREN ARROW block {
+        $$ = mknode(mknode(NULL, NULL, ID, $2), $6, FUNCTION, "FUNCTION");
+    }
+    | PRINT expr SEMICOLON { 
+        printf("%s\n", $2->value); 
+        $$ = mknode($2, NULL, PRINT, "PRINT");
+    }
+;
+
+block:
+    LBRACE statements RBRACE { 
+        $$ = mknode($2, NULL, 0, "BLOCK");
+    }
+;
+
+condition:
+    expr LESSTHAN expr { 
+        $$ = mknode($1, $3, LESSTHAN, "<");
+    }
+    | expr LESSEQUAL expr { 
+        $$ = mknode($1, $3, LESSEQUAL, "<=");
+    }
+    | expr GREATERTHAN expr { 
+        $$ = mknode($1, $3, GREATERTHAN, ">");
+    }
+    | expr GREATEREQUAL expr { 
+        $$ = mknode($1, $3, GREATEREQUAL, ">=");
+    }
+    | expr EQUALS expr { 
+        $$ = mknode($1, $3, EQUALS, "==");
+    }
+    | expr NOTEQUALS expr { 
+        $$ = mknode($1, $3, NOTEQUALS, "!=");
     }
 ;
 
@@ -112,6 +159,9 @@ factor:
     }
     | ID { 
         $$ = mknode(NULL, NULL, ID, yytext);
+    }
+    | STRING { 
+        $$ = mknode(NULL, NULL, STRING, yytext);
     }
 ;
 
