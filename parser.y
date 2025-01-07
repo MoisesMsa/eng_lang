@@ -5,6 +5,7 @@
 
 extern int yylex(void);  // Declarando yylex
 extern char* yytext;     // Declarando yytext
+extern int yylineno;
 
 // Definição da estrutura de 'node'
 typedef struct node {
@@ -49,7 +50,12 @@ void yyerror(const char *s);
 %type <nval> statements statement expr term factor condition block
 %type <sval> ID TYPE STRING
 
+%start program
+
 %%
+
+program : statements { }
+        ;
 
 // Regras da gramática
 
@@ -61,6 +67,13 @@ statements:
         $$ = mknode($1, $2, 0, "STATEMENTS");
     }
 ;
+
+param_list : param COMMA param_list {}
+           | param {}
+           ;
+
+param : ID COLON TYPE {}
+      ;
 
 statement:
     expr SEMICOLON { 
@@ -81,8 +94,8 @@ statement:
     | FOR LPAREN statement condition SEMICOLON expr RPAREN block { 
         $$ = mknode(mknode($3, mknode($4, $6, 0, "FOR CONDITION"), 0, "FOR INIT"), $8, FOR, "FOR");
     }
-    | FUNCTION ID LPAREN RPAREN ARROW block {
-        $$ = mknode(mknode(NULL, NULL, ID, $2), $6, FUNCTION, "FUNCTION");
+    | FUNCTION ID LPAREN param_list RPAREN ARROW block {
+        $$ = mknode(mknode(NULL, NULL, ID, $2), $7, FUNCTION, "FUNCTION");
     }
     | PRINT expr SEMICOLON { 
         printf("%s\n", $2->value); 
@@ -169,7 +182,7 @@ factor:
 
 // Função yyerror para tratar erros de sintaxe
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro de sintaxe: %s\n", s);
+    fprintf(stderr, "%d: Erro de sintaxe em %s\n", yylineno, yytext);
 }
 
 node* mknode(node *left, node *right, int type, char *value) {
