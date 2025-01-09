@@ -11,7 +11,7 @@ def merge(arr: int[], left: int, mid: int, right: int) -> void {
 	while i < n1 and j < n2 {
 		if leftArr[i] <= rightArr[j] {
 			arr[k] = leftArr[i];
-			1 += 1;
+			i += 1;
 		} else {
 			arr[k] = rightArr[j];
 			j += 1;

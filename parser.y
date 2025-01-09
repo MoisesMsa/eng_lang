@@ -39,6 +39,7 @@ void yyerror(const char *s);
 %token INCREMENT DECREMENT FUNCTION WHILE IF ELSE DO FOR ARROW TYPE
 %token IN PLUSEQUAL
 %token UMINUS  // Token específico para tratar o operador unário '-'
+%token AND OR
 
 // Precedência e associatividade
 %right POWER           // Exponenciação
@@ -46,8 +47,10 @@ void yyerror(const char *s);
 %left TIMES DIVIDE     // Multiplicação e divisão
 %left PLUS MINUS       // Soma e subtração
 %left LESSTHAN LESSEQUAL GREATERTHAN GREATEREQUAL EQUALS NOTEQUALS
+%left OR
+%left AND
 
-%type <nval> statements statement expr term factor condition block
+%type <nval> statements statement expr term factor condition block param param_list
 %type <sval> ID TYPE STRING
 
 %start program
@@ -62,95 +65,106 @@ program : statements { }
 statements:
     statement { 
         $$ = $1;
-    }
+    } 
     | statements statement {
-        $$ = mknode($1, $2, 0, "STATEMENTS");
-    }
+    } 
 ;
 
 param_list : param COMMA param_list {}
            | param {}
            ;
 
-param : ID COLON TYPE {}
-      ;
+param : 
+      | expr 
+      | ID
+      | ID COLON TYPE                  { }
+      | ID COLON TYPE LBRACKET RBRACKET { }
 
 statement:
     expr SEMICOLON { 
-        $$ = mknode($1, NULL, 0, "EXPRESSION");
     }
     | ID ASSIGNMENT expr SEMICOLON { 
-        $$ = mknode(mknode(NULL, NULL, ID, $1), $3, ASSIGNMENT, "=");
+    }
+     | ID dms ASSIGNMENT nlist SEMICOLON { 
+    }
+    | ID COLON TYPE ASSIGNMENT expr SEMICOLON { 
     }
     | IF condition block { 
-        $$ = mknode($2, $3, IF, "IF");
     }
     | IF condition block ELSE block { 
-        $$ = mknode($2, mknode($3, $5, ELSE, "ELSE"), IF, "IF");
     }
-    | WHILE condition DO block { 
-        $$ = mknode($2, $4, WHILE, "WHILE");
+    | WHILE condition block {
     }
     | FOR LPAREN statement condition SEMICOLON expr RPAREN block { 
-        $$ = mknode(mknode($3, mknode($4, $6, 0, "FOR CONDITION"), 0, "FOR INIT"), $8, FOR, "FOR");
     }
-    | FUNCTION ID LPAREN param_list RPAREN ARROW block {
-        $$ = mknode(mknode(NULL, NULL, ID, $2), $7, FUNCTION, "FUNCTION");
-    }
+    | FUNCTION ID LPAREN param_list RPAREN ARROW TYPE block {
+      }
+    | ID LPAREN param_list RPAREN block {
+      }
+    | ID LPAREN param_list RPAREN SEMICOLON {}
     | PRINT expr SEMICOLON { 
-        printf("%s\n", $2->value); 
-        $$ = mknode($2, NULL, PRINT, "PRINT");
     }
 ;
 
 block:
     LBRACE statements RBRACE { 
-        $$ = mknode($2, NULL, 0, "BLOCK");
     }
 ;
 
 condition:
     expr LESSTHAN expr { 
-        $$ = mknode($1, $3, LESSTHAN, "<");
     }
     | expr LESSEQUAL expr { 
-        $$ = mknode($1, $3, LESSEQUAL, "<=");
     }
     | expr GREATERTHAN expr { 
-        $$ = mknode($1, $3, GREATERTHAN, ">");
     }
     | expr GREATEREQUAL expr { 
-        $$ = mknode($1, $3, GREATEREQUAL, ">=");
     }
     | expr EQUALS expr { 
-        $$ = mknode($1, $3, EQUALS, "==");
     }
     | expr NOTEQUALS expr { 
-        $$ = mknode($1, $3, NOTEQUALS, "!=");
+    }
+    | condition AND condition { 
+    }
+    | condition OR condition { 
     }
 ;
 
+/* @todo checar string */
 expr:
     expr PLUS term { 
-        $$ = mknode($1, $3, PLUS, "+");
+    }
+    | ID PLUSEQUAL expr {
+
     }
     | expr MINUS term { 
-        $$ = mknode($1, $3, MINUS, "-");
     }
     | term { 
         $$ = $1;
     }
     | MINUS factor %prec UMINUS {  // Operador unário menos
-        $$ = mknode(NULL, $2, UMINUS, "-");
     }
+    | dms
+    | ID dms
 ;
+
+dms: 
+    | LBRACKET RBRACKET,
+    | LBRACKET RBRACKET dms
+    /* @todo checar ids vazios */
+    | LBRACKET ID RBRACKET dms
+    | LBRACKET nlist RBRACKET
+    ;
+ 
+ nlist: 
+      | expr
+      | expr COLON nlist
+      ;
 
 term:
     term TIMES factor { 
-        $$ = mknode($1, $3, TIMES, "*");
     }
     | term DIVIDE factor { 
-        $$ = mknode($1, $3, DIVIDE, "/");
     }
     | factor { 
         $$ = $1;
@@ -159,22 +173,19 @@ term:
 
 factor:
     factor POWER factor { 
-        $$ = mknode($1, $3, POWER, "^");
     }
     | LPAREN expr RPAREN { 
         $$ = $2;
     }
     | NUMBER { 
-        $$ = mknode(NULL, NULL, NUMBER, yytext);
     }
     | FLOAT { 
-        $$ = mknode(NULL, NULL, FLOAT, yytext);
     }
     | ID { 
-        $$ = mknode(NULL, NULL, ID, yytext);
+    }
+    | ID LBRACKET expr COLON expr RBRACKET { 
     }
     | STRING { 
-        $$ = mknode(NULL, NULL, STRING, yytext);
     }
 ;
 
@@ -182,17 +193,9 @@ factor:
 
 // Função yyerror para tratar erros de sintaxe
 void yyerror(const char *s) {
-    fprintf(stderr, "%d: Erro de sintaxe em %s\n", yylineno, yytext);
+    fprintf(stderr, "-> Linha %d: Erro de sintaxe em: %s\n", yylineno, yytext);
 }
 
-node* mknode(node *left, node *right, int type, char *value) {
-    node *n = (node *) malloc(sizeof(node));
-    n->type = type;
-    n->left = left;
-    n->right = right;
-    n->value = value ? strdup(value) : NULL;
-    return n;
-}
 
 void printtree(node *n) {
     if (n) {

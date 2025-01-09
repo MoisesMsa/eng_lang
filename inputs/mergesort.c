@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "mergesort.h"
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include "mergesort.h"
 
 void merge(int array[], int l, int m, int r) {
     int i, j, k;

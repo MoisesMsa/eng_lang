@@ -14,9 +14,12 @@ void addToken(const char *tokenType, const char *value) {
 %%
 
 [\n]                            {yylineno++;}
-[ \t\r]+                      { /* Ignorar espaços em branco */ }
+[ \t\r]+                        { /* Ignorar espaços em branco */ }
 [0-9]+                          { yylval.ival = atoi(yytext); isUnaryMinus = 0; return NUMBER; }
 [0-9]+\.[0-9]+                  { yylval.fval = atof(yytext); return FLOAT; }
+"and"                           { return AND; }
+"or"                            { return OR; }
+"int\[\]"                       { yylval.sval = strdup("int[]"); return TYPE; }
 "print"                         { return PRINT; }
 "do"                            { return DO; }
 [iI][fF]                        { return IF; }
