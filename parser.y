@@ -39,6 +39,7 @@ void yyerror(const char *s);
 %token INCREMENT DECREMENT FUNCTION WHILE IF ELSE DO FOR ARROW TYPE
 %token IN PLUSEQUAL
 %token UMINUS  // Token específico para tratar o operador unário '-'
+%token AND OR
 
 // Precedência e associatividade
 %right POWER           // Exponenciação
@@ -46,8 +47,10 @@ void yyerror(const char *s);
 %left TIMES DIVIDE     // Multiplicação e divisão
 %left PLUS MINUS       // Soma e subtração
 %left LESSTHAN LESSEQUAL GREATERTHAN GREATEREQUAL EQUALS NOTEQUALS
+%left OR
+%left AND
 
-%type <nval> statements statement expr term factor condition block
+%type <nval> statements statement expr term factor condition block param param_list
 %type <sval> ID TYPE STRING
 
 %start program
@@ -72,8 +75,8 @@ param_list : param COMMA param_list {}
            | param {}
            ;
 
-param : ID COLON TYPE {}
-      ;
+param : ID COLON TYPE                  { $$ = mknode(NULL, NULL, TYPE, $3); }
+      | ID COLON TYPE LBRACKET RBRACKET { $$ = mknode(NULL, NULL, TYPE, "int[]"); }
 
 statement:
     expr SEMICOLON { 
@@ -82,20 +85,23 @@ statement:
     | ID ASSIGNMENT expr SEMICOLON { 
         $$ = mknode(mknode(NULL, NULL, ID, $1), $3, ASSIGNMENT, "=");
     }
+    | ID COLON TYPE ASSIGNMENT expr SEMICOLON { 
+        $$ = mknode(mknode(NULL, mknode(NULL, NULL, TYPE, $3), ID, $1), $5, ASSIGNMENT, "=");
+    }
     | IF condition block { 
         $$ = mknode($2, $3, IF, "IF");
     }
     | IF condition block ELSE block { 
         $$ = mknode($2, mknode($3, $5, ELSE, "ELSE"), IF, "IF");
     }
-    | WHILE condition DO block { 
-        $$ = mknode($2, $4, WHILE, "WHILE");
+    | WHILE condition block {
+        $$ = mknode($2, $3, WHILE, "WHILE");
     }
     | FOR LPAREN statement condition SEMICOLON expr RPAREN block { 
         $$ = mknode(mknode($3, mknode($4, $6, 0, "FOR CONDITION"), 0, "FOR INIT"), $8, FOR, "FOR");
     }
-    | FUNCTION ID LPAREN param_list RPAREN ARROW block {
-        $$ = mknode(mknode(NULL, NULL, ID, $2), $7, FUNCTION, "FUNCTION");
+    | FUNCTION ID LPAREN param_list RPAREN ARROW TYPE block {
+    $$ = mknode(mknode(NULL, mknode(NULL, NULL, TYPE, $7), ID, $2), $8, FUNCTION, "FUNCTION");
     }
     | PRINT expr SEMICOLON { 
         printf("%s\n", $2->value); 
@@ -127,6 +133,12 @@ condition:
     }
     | expr NOTEQUALS expr { 
         $$ = mknode($1, $3, NOTEQUALS, "!=");
+    }
+    | condition AND condition { 
+        $$ = mknode($1, $3, AND, "and");
+    }
+    | condition OR condition { 
+        $$ = mknode($1, $3, OR, "or");
     }
 ;
 
@@ -173,6 +185,9 @@ factor:
     | ID { 
         $$ = mknode(NULL, NULL, ID, yytext);
     }
+    | ID LBRACKET expr COLON expr RBRACKET { 
+        $$ = mknode(mknode(mknode(NULL, NULL, ID, $1), $3, 0, "START"), $5, 0, "SLICE");
+    }
     | STRING { 
         $$ = mknode(NULL, NULL, STRING, yytext);
     }
@@ -182,7 +197,7 @@ factor:
 
 // Função yyerror para tratar erros de sintaxe
 void yyerror(const char *s) {
-    fprintf(stderr, "%d: Erro de sintaxe em %s\n", yylineno, yytext);
+    fprintf(stderr, "-> Linha %d: Erro de sintaxe em: %s\n", yylineno, yytext);
 }
 
 node* mknode(node *left, node *right, int type, char *value) {
