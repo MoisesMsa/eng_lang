@@ -4,7 +4,7 @@
 #include <string.h>
 
 int yylex(void);
-int yyerror(char * 5);
+int yyerror(char *s);
 extern char * yytext;
 %}
 
@@ -24,8 +24,18 @@ extern char * yytext;
 
 %%
 
-program : stmts_list { }
+program : sub_programs { }
         ;
+
+sub_programs : sub_programs sub_program {}
+             | sub_program {}
+             ;
+
+sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {}
+            ;
+
+block : '{' stmts_list '}'
+      ;
 
 stmts_list : stmt {}
            | stmt ';' stmts_list
@@ -36,9 +46,7 @@ stmt : ID ASSIGN expr {}
      | IF expr THEN stmt ELSE stmt {}
      | WHILE expr DO stmt {}
      | FOR ID IN ID stmt {}
-     | FUNCTION ID '(' param_list ')' ARROW TYPE stmt {}
      | expr {}
-     | '{' stmts_list '}' {}
      ;
 
 param_list : param ',' param_list {}
