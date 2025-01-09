@@ -65,17 +65,20 @@ program : statements { }
 statements:
     statement { 
         $$ = $1;
-    }
+    } 
     | statements statement {
         $$ = mknode($1, $2, 0, "STATEMENTS");
-    }
+    } 
 ;
 
 param_list : param COMMA param_list {}
            | param {}
            ;
 
-param : ID COLON TYPE                  { $$ = mknode(NULL, NULL, TYPE, $3); }
+param : 
+      | expr 
+      | ID
+      | ID COLON TYPE                  { $$ = mknode(NULL, NULL, TYPE, $3); }
       | ID COLON TYPE LBRACKET RBRACKET { $$ = mknode(NULL, NULL, TYPE, "int[]"); }
 
 statement:
@@ -84,6 +87,9 @@ statement:
     }
     | ID ASSIGNMENT expr SEMICOLON { 
         $$ = mknode(mknode(NULL, NULL, ID, $1), $3, ASSIGNMENT, "=");
+    }
+     | ID dms ASSIGNMENT expr SEMICOLON { 
+        $$ = mknode(mknode(NULL, NULL, ID, $1), $4, ASSIGNMENT, "=");
     }
     | ID COLON TYPE ASSIGNMENT expr SEMICOLON { 
         $$ = mknode(mknode(NULL, mknode(NULL, NULL, TYPE, $3), ID, $1), $5, ASSIGNMENT, "=");
@@ -101,8 +107,11 @@ statement:
         $$ = mknode(mknode($3, mknode($4, $6, 0, "FOR CONDITION"), 0, "FOR INIT"), $8, FOR, "FOR");
     }
     | FUNCTION ID LPAREN param_list RPAREN ARROW TYPE block {
-    $$ = mknode(mknode(NULL, mknode(NULL, NULL, TYPE, $7), ID, $2), $8, FUNCTION, "FUNCTION");
-    }
+       $$ = mknode(mknode(NULL, mknode(NULL, NULL, TYPE, $7), ID, $2), $8, FUNCTION, "FUNCTION");
+      }
+    | ID LPAREN param_list RPAREN block {
+      }
+    | ID LPAREN param_list RPAREN SEMICOLON {}
     | PRINT expr SEMICOLON { 
         printf("%s\n", $2->value); 
         $$ = mknode($2, NULL, PRINT, "PRINT");
@@ -142,9 +151,13 @@ condition:
     }
 ;
 
+/* @todo checar string */
 expr:
     expr PLUS term { 
         $$ = mknode($1, $3, PLUS, "+");
+    }
+    | ID PLUSEQUAL expr {
+
     }
     | expr MINUS term { 
         $$ = mknode($1, $3, MINUS, "-");
@@ -155,7 +168,22 @@ expr:
     | MINUS factor %prec UMINUS {  // Operador unário menos
         $$ = mknode(NULL, $2, UMINUS, "-");
     }
+    | dms
+    | ID dms
 ;
+
+dms: 
+    | LBRACKET RBRACKET,
+    | LBRACKET RBRACKET dms
+    /* @todo checar ids vazios */
+    | LBRACKET ID RBRACKET dms
+    | LBRACKET nlist RBRACKET
+    ;
+ 
+ nlist: 
+      | nlist COLON expr
+      | expr
+      ;
 
 term:
     term TIMES factor { 
