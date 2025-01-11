@@ -6,4 +6,4 @@
 ### Execução
 ```./parser```
 ou
-```./parser < ./inputs/input01.txt```
+```./parser < ./inputs/mergeSort.ele```

@@ -9,9 +9,9 @@ extern int yylineno;
 
 // Definição da estrutura de 'node'
 typedef struct node {
-    int type;
     struct node *left;
     struct node *right;
+    int type;
     char *value;
 } node;
 
@@ -50,15 +50,16 @@ void yyerror(const char *s);
 %left OR
 %left AND
 
-%type <nval> statements statement expr term factor condition block param param_list
+%type <nval> statements statement expr term factor condition block param param_list nlist
 %type <sval> ID TYPE STRING
 
 %start program
 
 %%
 
-program : statements { }
-        ;
+program :
+    statements { }
+;
 
 // Regras da gramática
 
@@ -67,47 +68,63 @@ statements:
         $$ = $1;
     } 
     | statements statement {
+        $$ = mknode($1, $2, 0, "STATEMENTS");
     } 
 ;
 
-param_list : param COMMA param_list {}
-           | param {}
-           ;
+param_list:
+    param COMMA param_list {}
+    | param {}
+;
 
-param : 
-      | expr 
-      | ID
-      | ID COLON TYPE                  { }
-      | ID COLON TYPE LBRACKET RBRACKET { }
+param: 
+    | expr 
+    | ID
+    | ID COLON TYPE {
+        $$ = mknode(NULL, NULL, TYPE, $3);
+    }
+    | ID COLON TYPE LBRACKET RBRACKET {
+        $$ = mknode(NULL, NULL, TYPE, "int[]");
+    }
 
 statement:
-    expr SEMICOLON { 
+    expr SEMICOLON {
+        $$ = $1;
     }
-    | ID ASSIGNMENT expr SEMICOLON { 
+    | ID ASSIGNMENT expr SEMICOLON {
+        $$ = mknode(NULL, $3, ASSIGNMENT, "=");
     }
-     | ID dms ASSIGNMENT nlist SEMICOLON { 
+    | ID dms ASSIGNMENT nlist SEMICOLON {
+        $$ = mknode(NULL, $4, ASSIGNMENT, "=");
     }
-    | ID COLON TYPE ASSIGNMENT expr SEMICOLON { 
+    | ID COLON TYPE ASSIGNMENT expr SEMICOLON {
+        $$ = mknode(NULL, $5, ASSIGNMENT, "=");
     }
-    | IF condition block { 
+    | ID LPAREN param_list RPAREN block {
+        // $$ = mknode($1, $3, FUNCTION, $5);
     }
-    | IF condition block ELSE block { 
+    | ID LPAREN param_list RPAREN SEMICOLON {
+    }
+    | IF condition block {
+    }
+    | IF condition block ELSE block {
     }
     | WHILE condition block {
     }
-    | FOR LPAREN statement condition SEMICOLON expr RPAREN block { 
+    | FOR ID IN expr block {
     }
     | FUNCTION ID LPAREN param_list RPAREN ARROW TYPE block {
-      }
-    | ID LPAREN param_list RPAREN block {
-      }
-    | ID LPAREN param_list RPAREN SEMICOLON {}
-    | PRINT expr SEMICOLON { 
+    }
+    | FUNCTION ID LPAREN param_list RPAREN LBRACE statements RBRACE {
+    }
+    | PRINT expr SEMICOLON {
     }
 ;
 
 block:
     LBRACE statements RBRACE { 
+    }
+    | LBRACE expr RBRACE { 
     }
 ;
 
@@ -132,12 +149,13 @@ condition:
 
 /* @todo checar string */
 expr:
-    expr PLUS term { 
+    expr PLUS term {
+        $$ = mknode($1, $3, PLUS, "+");
+    }
+    | expr MINUS term {
+        $$ = mknode($1, $3, MINUS, "-");
     }
     | ID PLUSEQUAL expr {
-
-    }
-    | expr MINUS term { 
     }
     | term { 
         $$ = $1;
@@ -149,17 +167,18 @@ expr:
 ;
 
 dms: 
-    | LBRACKET RBRACKET,
-    | LBRACKET RBRACKET dms
     /* @todo checar ids vazios */
+    | LBRACKET RBRACKET
+    | LBRACKET RBRACKET dms
     | LBRACKET ID RBRACKET dms
     | LBRACKET nlist RBRACKET
-    ;
+;
  
- nlist: 
+ nlist:
       | expr
       | expr COLON nlist
-      ;
+      | expr COMMA nlist
+;
 
 term:
     term TIMES factor { 
@@ -177,13 +196,15 @@ factor:
     | LPAREN expr RPAREN { 
         $$ = $2;
     }
+    | ID { 
+    }
+    | ID LPAREN expr RPAREN{ 
+    }
+    | ID LBRACKET expr COLON expr RBRACKET { 
+    }
     | NUMBER { 
     }
     | FLOAT { 
-    }
-    | ID { 
-    }
-    | ID LBRACKET expr COLON expr RBRACKET { 
     }
     | STRING { 
     }
@@ -196,6 +217,14 @@ void yyerror(const char *s) {
     fprintf(stderr, "-> Linha %d: Erro de sintaxe em: %s\n", yylineno, yytext);
 }
 
+node* mknode(node *left, node *right, int type, char *value) {
+    node *n = (node *) malloc(sizeof(node));
+    n->left = left;
+    n->right = right;
+    n->type = type;
+    n->value = value ? strdup(value) : NULL;
+    return n;
+}
 
 void printtree(node *n) {
     if (n) {
