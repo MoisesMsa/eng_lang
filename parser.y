@@ -46,7 +46,10 @@ stmt : ID ASSIGN expr {}
      | IF expr THEN stmt ELSE stmt {}
      | WHILE expr DO stmt {}
      | FOR ID IN ID stmt {}
+     | sub_program {}
      | expr {}
+     | block {}
+     | ID param ASSIGN expr 
      ;
 
 param_list : param ',' param_list {}
@@ -54,6 +57,7 @@ param_list : param ',' param_list {}
            ;
 
 param : ID ':' TYPE {}
+      |
       ;
 
 expr : expr PLUS term {}
