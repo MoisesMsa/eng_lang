@@ -38,7 +38,7 @@ extern int yylineno;
 
 %type <sValue> sub_programs sub_program stmt stmts_list
 %type <sValue> block param param_list dms
-%type <sValue> stmt_array stmt_matrix dms_acess matrix_acess matrix_twod
+%type <sValue> stmt_array stmt_matrix dms_acess matrix_twod
 %type <sValue> expr term factor exp expr_list args
 
 %start program
@@ -55,8 +55,7 @@ sub_programs : sub_programs sub_program {}
 sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {}
             ;
 
-param_list : {}
-           | param ',' param_list {}
+param_list : param ',' param_list {}
            | param {}
            ;
 
@@ -75,10 +74,8 @@ stmts_list : stmt ';' {}
 
 stmt : ID ASSIGN expr {}
      | ID ':' TYPE ASSIGN expr {}
-     | ID ASSIGN '(' expr ')' {} // acho que pode tirar, talvez seja redundante
      | ID INCREMENT_ASSIGN expr {}
      | ID DECREMENT_ASSIGN expr {}
-     | ID '[' expr ':' expr ']' ASSIGN expr {} // slice de array
      | IF condition block {}
      | IF condition block ELSE block {}
      | WHILE condition block {}
@@ -88,7 +85,7 @@ stmt : ID ASSIGN expr {}
      | expr {} // permito coisas como chamada de função e incremento e decremento em todo lugar
      ;
 
-stmt_array : ID '[' expr ':' expr ']' ASSIGN expr {}
+stmt_array : ID '[' expr ':' expr ']' ASSIGN expr {} // slice de array
            | ID ':' TYPE dms ASSIGN expr {}
            | ID dms_acess ASSIGN expr {}
            ;
@@ -96,15 +93,11 @@ stmt_array : ID '[' expr ':' expr ']' ASSIGN expr {}
 stmt_matrix : ID ':' MATRIX ASSIGN expr {} // matriz padrão com 2 dimensões
             | ID ':' MATRIX '[' expr ']' ASSIGN expr {}  // define quantas dimensões são
             | ID matrix_twod ASSIGN expr {}
-            | ID matrix_acess ASSIGN expr {}
             ;
 
 matrix_twod : '[' expr ']' '[' ']' {} // aqui devolveria apenas a linha que ele quer, apenas para 2d
              | '[' ']' '[' expr ']' {} // aqui devolveria apenas a coluna que ele quer, apenas para 2d
              ;
-
-matrix_acess : '[' expr ']' '[' expr ']' {}
-             | '[' expr ']' '[' expr ']' dms_acess {}
 
 dms_acess : '[' expr ']' {}
           | '[' expr ']' dms_acess {}
@@ -144,8 +137,8 @@ factor : exp EXPOENT factor {}
        ;
 
 // falta abordar de passar uma matriz como por exemplo [[1,2][3,4]]
+// falta tratar o - unario
 exp : '(' expr ')' {}
-    | '-' expr {} // semanticamente, como faço isso voltar sendo um -float por exemplo? 
     | ID {}
     | NUMBER {}
     | FLOAT {}
@@ -158,7 +151,6 @@ exp : '(' expr ')' {}
     | ID INCREMENT {}
     | ID DECREMENT {}
     | ID matrix_twod {}
-    | ID matrix_acess {}
     ;
 
 expr_list : expr {}
