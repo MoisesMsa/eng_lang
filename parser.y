@@ -9,6 +9,8 @@ extern char * yytext;
 extern int yylineno;
 %}
 
+// sera se vai ser preciso criar um union para arrays e matrizes? 
+// do tipo struct que vai ter linhas e colunas
 %union {
     char *sValue;
 };
@@ -34,7 +36,10 @@ extern int yylineno;
 %left OR
 %left NOT
 
-%type <sValue> stmt stmts_list expr term factor expr
+%type <sValue> sub_programs sub_program stmt stmts_list
+%type <sValue> block param param_list dms
+%type <sValue> stmt_array stmt_matrix dms_acess matrix_acess matrix_twod
+%type <sValue> expr term factor exp expr_list args
 
 %start program
 
@@ -108,15 +113,15 @@ dms : '[' ']' {}
     | '[' ']' dms {}
     ;
 
-condition : expr '<' expr {}
-          | expr '>' expr {}
-          | expr '<=' expr {}
-          | expr '>=' expr {}
-          | expr '==' expr {}
-          | expr '!=' expr {}
-          | '!' condition {}
-          | condition '&&' condition {}
-          | condition '||' condition {}
+condition : expr LESS expr {}
+          | expr GREATER expr {}
+          | expr LESSEQUALS expr {}
+          | expr GREATEREQUALS expr {}
+          | expr EQUALS expr {}
+          | expr DIFF expr {}
+          | NOT condition {}
+          | condition AND condition {}
+          | condition OR condition {}
           ;
 
 // abaixo disso é tudo lado direito
