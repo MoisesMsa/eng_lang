@@ -26,8 +26,8 @@
 ":"                   { return(yytext[0]); }
 ";"                   { return(yytext[0]); }
 "="                   { return(ASSIGN); }
-"+="                  { return(yytext[0]); }
-"-="                  { return(yytext[0]);}
+"+="                  { return(INCREMENT_ASSIGN); }
+"-="                  { return(DECREMENT_ASSIGN);}
 ","                   { return(yytext[0]); }
 "=="                  { return(EQUALS); }
 "!="                  { return(DIFF); }

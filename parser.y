@@ -20,11 +20,11 @@ extern int yylineno;
 %token <sValue> FLOAT
 %token <sValue> STRING
 %token <sValue> TYPE
-%token IF ELSE WHILE FOR IN ARROW ASSIGN
+%token IF ELSE WHILE FOR IN ARROW ASSIGN FUNCTION
 %token PLUS MINUS MULT DIVISION EXPOENT
 %token AND OR NOT
 %token EQUALS DIFF LESS GREATER LESSEQUALS GREATEREQUALS
-%token INCREMENT DECREMENT
+%token INCREMENT DECREMENT INCREMENT_ASSIGN DECREMENT_ASSIGN
 %token MATRIX
 
 %right EXPOENT
@@ -62,11 +62,11 @@ param_list : {}
 
 param : ID ':' TYPE {}
       | ID ':' TYPE dms {}
-      |
+      | {}
       | ID ':' MATRIX {}
       ;
 
-block : '{' stmts_list '}'
+block : '{' stmts_list '}' {}
       ;
 
 stmts_list : stmt ';' {}
@@ -76,8 +76,8 @@ stmts_list : stmt ';' {}
 stmt : ID ASSIGN expr {}
      | ID ':' TYPE ASSIGN expr {}
      | ID ASSIGN '(' expr ')' {} // acho que pode tirar, talvez seja redundante
-     | ID '+=' expr {}
-     | ID '-=' expr {}
+     | ID INCREMENT_ASSIGN expr {}
+     | ID DECREMENT_ASSIGN expr {}
      | ID '[' expr ':' expr ']' ASSIGN expr {} // slice de array
      | IF condition block {}
      | IF condition block ELSE block {}
@@ -169,6 +169,8 @@ args : {}
      | expr {}
      | expr ',' args {}
      ;
+
+%%
 
 int main(void) {
      return yyparse();
