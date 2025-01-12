@@ -1,4 +1,5 @@
 %{
+  #include "parser.tab.h"
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
@@ -6,7 +7,8 @@
 
 %%
 
-[ \t\n]               ;
+[\n]                  {yylineno++;}
+[ \t\r]               {}
 [0-9]+                { yyval.sValue = strdup(yytext); 
                         return NUMBER;}
 [0-9]+\.[0-9]+        { yyval.sValue = strdup(yytext);
@@ -27,9 +29,9 @@
 "+="                  { return(yytext[0]); }
 "-="                  { return(yytext[0]);}
 ","                   { return(yytext[0]); }
-"=="                  { return(yytext[0]); }
-"!="                  { return(yytext[0]); }
-"!"                   { return(yytext[0]); }
+"=="                  { return(EQUALS); }
+"!="                  { return(DIFF); }
+"!"                   { return(NOT); }
 "-"                   { return(MINUS); }
 "+"                   { return(PLUS); }
 "*"                   { return(MULT); }
@@ -37,12 +39,12 @@
 "**"                  { return(EXPOENT); }
 "++"                  { return(INCREMENT); }
 "--"                  { return(DECREMENT); }
-"<"                   { return(yytext[0]); }
-">"                   { return(yytext[0]); }
-">="                  { return(yytext[0]); }
-"<="                  { return(yytext[0]); }
-"&&"                  { return(yytext[0]); }
-"||"                  { return(yytext[0]); }
+"<"                   { return(LESS); }
+">"                   { return(GREATER); }
+">="                  { return(GREATEREQUALS); }
+"<="                  { return(LESSEQUALS); }
+"&&"                  { return(AND); }
+"||"                  { return(OR); }
 "while"               { return(WHILE); }
 "for"                 { return(FOR); }
 "in"                  { return(IN); }

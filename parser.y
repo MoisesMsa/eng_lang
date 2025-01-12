@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-int yylex(void);
+extern int yylex(void);
 int yyerror(char *s);
 extern char * yytext;
+extern int yylineno;
 %}
 
 %union {
@@ -14,9 +15,24 @@ extern char * yytext;
 
 %token <sValue> ID
 %token <sValue> NUMBER
+%token <sValue> FLOAT
+%token <sValue> STRING
 %token <sValue> TYPE
-%token IF THEN ELSE WHILE DO BEGIN END ASSIGN
+%token IF ELSE WHILE FOR IN ARROW ASSIGN
 %token PLUS MINUS MULT DIVISION EXPOENT
+%token AND OR NOT
+%token EQUALS DIFF LESS GREATER LESSEQUALS GREATEREQUALS
+%token INCREMENT DECREMENT
+%token MATRIX
+
+%right EXPOENT
+%right ASSIGN
+%left MULT DIVISION
+%left PLUS MINUS
+%left EQUALS DIFF LESS GREATER LESSEQUALS GREATEREQUALS
+%left AND
+%left OR
+%left NOT
 
 %type <sValue> stmt stmts_list expr term factor expr
 
@@ -42,6 +58,7 @@ param_list : {}
 param : ID ':' TYPE {}
       | ID ':' TYPE dms {}
       |
+      | ID ':' MATRIX {}
       ;
 
 block : '{' stmts_list '}'
@@ -147,3 +164,12 @@ args : {}
      | expr {}
      | expr ',' args {}
      ;
+
+int main(void) {
+     return yyparse();
+}
+
+int yyerror(char *msg){
+     fprintf(stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
+     return 0;
+}
