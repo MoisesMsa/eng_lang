@@ -1,0 +1,32 @@
+def main() -> void {
+    num: int;
+    count_0_25: int = 0;
+    count_26_50: int = 0;
+    count_51_75: int = 0;
+    count_76_100: int = 0;
+
+    while true {
+        print("Digite um número (ou um número negativo para sair):");
+        num = read_int(); // Função fictícia para leitura de inteiros
+
+        if num < 0 {
+            break; // Termina o loop ao encontrar um número negativo
+        }
+
+        if num >= 0 and num <= 25 {
+            count_0_25 += 1;
+        } else if num >= 26 and num <= 50 {
+            count_26_50 += 1;
+        } else if num >= 51 and num <= 75 {
+            count_51_75 += 1;
+        } else if num >= 76 and num <= 100 {
+            count_76_100 += 1;
+        }
+    }
+
+    print("Resultados:");
+    print("[0, 25]:", count_0_25);
+    print("[26, 50]:", count_26_50);
+    print("[51, 75]:", count_51_75);
+    print("[76, 100]:", count_76_100);
+}
