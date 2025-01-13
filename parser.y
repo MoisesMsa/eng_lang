@@ -68,21 +68,23 @@ param : ID ':' TYPE {}
 block : '{' stmts_list '}' {}
       ;
 
-stmts_list : stmt ';' {}
-           | stmt ';' stmts_list {}
+stmts_list : stmt {}
+           | stmt stmts_list {}
            ;
 
-stmt : ID ASSIGN expr {}
-     | ID ':' TYPE ASSIGN expr {}
-     | ID INCREMENT_ASSIGN expr {}
-     | ID DECREMENT_ASSIGN expr {}
+stmt : ID ASSIGN expr ';' {}
+     | ID ':' TYPE ASSIGN expr ';' {}
+     | ID INCREMENT ';' {}
+     | ID DECREMENT ';' {}
+     | ID INCREMENT_ASSIGN expr ';' {}
+     | ID DECREMENT_ASSIGN expr ';' {}
+     | ID '(' args ')' ';' {} // chamada de função
      | IF condition block {}
      | IF condition block ELSE block {}
      | WHILE condition block {}
      | FOR ID IN ID block {}
-     | stmt_array {}
-     | stmt_matrix {}
-     | expr {} // permito coisas como chamada de função e incremento e decremento em todo lugar
+     | stmt_array ';' {}
+     | stmt_matrix ';' {}
      ;
 
 stmt_array : ID '[' expr ':' expr ']' ASSIGN expr {} // slice de array
