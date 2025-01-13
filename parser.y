@@ -20,12 +20,14 @@ extern int yylineno;
 %token <sValue> FLOAT
 %token <sValue> STRING
 %token <sValue> TYPE
+%token <sValue> BOOL
 %token IF ELSE WHILE FOR IN ARROW ASSIGN FUNCTION
 %token PLUS MINUS MULT DIVISION EXPOENT
 %token AND OR NOT
 %token EQUALS DIFF LESS GREATER LESSEQUALS GREATEREQUALS
 %token INCREMENT DECREMENT INCREMENT_ASSIGN DECREMENT_ASSIGN
 %token MATRIX
+%token STRUCT
 
 %right EXPOENT
 %right ASSIGN
@@ -36,8 +38,8 @@ extern int yylineno;
 %left OR
 %left NOT
 
-%type <sValue> sub_programs sub_program stmt stmts_list
-%type <sValue> block param param_list dms
+%type <sValue> sub_programs sub_program stmt stmts_list structs declaration declarations
+%type <sValue> block param param_list dms condition
 %type <sValue> stmt_array stmt_matrix dms_acess matrix_twod
 %type <sValue> expr term factor exp expr_list args
 
@@ -46,7 +48,21 @@ extern int yylineno;
 %%
 
 program : sub_programs { }
+        | structs {}
         ;
+
+structs : STRUCT ID '{' declarations '}' {}
+        | STRUCT ID '{' declarations sub_programs '}' {}
+        ;
+
+declarations : declaration {}
+             | declaration declarations {}
+             ;
+
+declaration : ID ':' TYPE ';' {}
+            | ID ':' TYPE dms ';' {}
+            | ID ':' MATRIX ';' {}
+            ;
 
 sub_programs : sub_programs sub_program {}
              | sub_program {}
@@ -79,13 +95,21 @@ stmt : ID ASSIGN expr ';' {}
      | ID INCREMENT_ASSIGN expr ';' {}
      | ID DECREMENT_ASSIGN expr ';' {}
      | ID '(' args ')' ';' {} // chamada de função
-     | IF condition block {}
-     | IF condition block ELSE block {}
+     | declaration {}
+     | if_stmt {}
      | WHILE condition block {}
      | FOR ID IN ID block {}
      | stmt_array ';' {}
      | stmt_matrix ';' {}
      ;
+
+if_stmt : IF condition block elseif {}
+        ;
+
+elseif : ELSE IF condition block elseif {}
+       | ELSE block {}
+       | {}
+       ;
 
 stmt_array : ID '[' expr ':' expr ']' ASSIGN expr {} // slice de array
            | ID ':' TYPE dms ASSIGN expr {}
@@ -117,6 +141,9 @@ condition : expr LESS expr {}
           | NOT condition {}
           | condition AND condition {}
           | condition OR condition {}
+          | ID {}
+          | BOOL {}
+          | ID '(' args ')' ';' {} // chamada de função
           ;
 
 // abaixo disso é tudo lado direito
@@ -145,6 +172,7 @@ exp : '(' expr ')' {}
     | NUMBER {}
     | FLOAT {}
     | STRING {}
+    | BOOL {}
     | ID dms_acess {} 
     | ID '[' expr  ':' expr ']' {} // slice de array
     | ID '(' args ')' {} // chamada de função

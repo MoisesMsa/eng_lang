@@ -1,9 +1,9 @@
 def main() -> void {
-    x: float = 3.5;   // Número racional
-    y: float = 2.1;   // Número racional
-    c: int = 5;       // Número inteiro
+    x: float = 3.5; 
+    y: float = 2.1; 
+    c: int = 5;       
 
-    resultado: float = (x * x) - y + c;  // Avaliação da expressão
+    resultado: float = (x * x) - y + c;
 
-    print(resultado); // Impressão do resultado
+    print(resultado);
 }

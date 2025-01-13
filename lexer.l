@@ -45,7 +45,7 @@
 ">"                   { return(GREATER); }
 ">="                  { return(GREATEREQUALS); }
 "<="                  { return(LESSEQUALS); }
-"and"                  { return(AND); }
+"and"                 { return(AND); }
 "or"                  { return(OR); }
 "while"               { return(WHILE); }
 "for"                 { return(FOR); }
@@ -53,6 +53,9 @@
 "def"                 { return(FUNCTION); }
 "->"                  { return(ARROW); }
 "matrix"              { return(MATRIX); }
+"struct"              { return(STRUCT); }
+"true"|"false"        { yylval.sValue = strdup(yytext);
+                        return(BOOL);}
 "int"|"void"|"float"|"double" { yylval.sValue = strdup(yytext);
                                 return(TYPE); }
 [a-zA-Z][a-zA-Z0-9]*  { yylval.sValue = strdup(yytext);
