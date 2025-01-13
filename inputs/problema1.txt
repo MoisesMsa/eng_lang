@@ -1,0 +1,9 @@
+def main() -> void {
+    x: float = 3.5; 
+    y: float = 2.1; 
+    c: int = 5;       
+
+    resultado: float = (x * x) - y + c;
+
+    print(resultado);
+}

@@ -1,0 +1,32 @@
+def main() -> void {
+    num: int;
+    count0to25: int = 0;
+    count26to50: int = 0;
+    count51to75: int = 0;
+    count76to100: int = 0;
+
+    while true {
+        print("Digite um número (ou um número negativo para sair):");
+        num = readint(); 
+
+        if num < 0 {
+            break(); 
+        }
+
+        if num >= 0 and num <= 25 {
+            count0to25 += 1;
+        } else if num >= 26 and num <= 50 {
+            count26to50 += 1;
+        } else if num >= 51 and num <= 75 {
+            count51to75 += 1;
+        } else if num >= 76 and num <= 100 {
+            count76to100 += 1;
+        }
+    }
+
+    print("Resultados:");
+    print("[0, 25]:", count0to25);
+    print("[26, 50]:", count26to50);
+    print("[51, 75]:", count51to75);
+    print("[76, 100]:", count76to100);
+}
