@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern int yylex(void);
+int yylex(void);
 int yyerror(char *s);
 extern char * yytext;
 extern int yylineno;
@@ -69,7 +69,7 @@ block : '{' stmts_list '}' {}
       ;
 
 stmts_list : stmt ';' {}
-           | stmt ';' stmts_list
+           | stmt ';' stmts_list {}
            ;
 
 stmt : ID ASSIGN expr {}

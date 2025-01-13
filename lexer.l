@@ -1,19 +1,21 @@
 %{
-  #include "parser.tab.h"
+  #include "y.tab.h"
   #include <stdio.h>
   #include <stdlib.h>
   #include <string.h>
+
+  extern int yyerror(char *msg);
 %}
 
 %%
 
 [\n]                  {yylineno++;}
 [ \t\r]               {}
-[0-9]+                { yyval.sValue = strdup(yytext); 
+[0-9]+                { yylval.sValue = strdup(yytext); 
                         return NUMBER;}
-[0-9]+\.[0-9]+        { yyval.sValue = strdup(yytext);
+[0-9]+\.[0-9]+        { yylval.sValue = strdup(yytext);
                         return FLOAT;}
-\"(\\.|[^\"])*\"      { yyval.sValue = strdup(yytext);
+\"(\\.|[^\"])*\"      { yylval.sValue = strdup(yytext);
                         return STRING;}
 [iI][fF]              { return(IF); }
 "else"                { return(ELSE); }
@@ -43,30 +45,23 @@
 ">"                   { return(GREATER); }
 ">="                  { return(GREATEREQUALS); }
 "<="                  { return(LESSEQUALS); }
-"&&"                  { return(AND); }
-"||"                  { return(OR); }
+"and"                  { return(AND); }
+"or"                  { return(OR); }
 "while"               { return(WHILE); }
 "for"                 { return(FOR); }
 "in"                  { return(IN); }
 "def"                 { return(FUNCTION); }
 "->"                  { return(ARROW); }
 "matrix"              { return(MATRIX); }
-"int"|"void"|"float"|"double" { yyval.sValue = strdup(yytext);
+"int"|"void"|"float"|"double" { yylval.sValue = strdup(yytext);
                                 return(TYPE); }
-[a-zA-Z][a-zA-Z0-9]*  { yyval.sValue = strdup(yytext);
+[a-zA-Z][a-zA-Z0-9]*  { yylval.sValue = strdup(yytext);
                         return(ID); }
 [\/\/.*]              { /* Ignorar comentários de linha única */ }
-.                     { yyval.sValue = strdup(yytext);
-                        return(INVALID); }
+.                     { yyerror("Caractere invalido"); }
 
 %%
 
 #ifndef yywrap
     int yywrap(void) {return 1;}
 #endif
-
-int main(void)
-{
-    yylex();
-    return 0;
-}

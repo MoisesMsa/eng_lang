@@ -40,7 +40,7 @@ def mergeSort(arr: int[], left: int, right: int) -> void {
 	}
 }
 
-def main (){
+def main () -> void{
 	arr: int[] = [12, 11, 13, 5, 6, 7];
 	mergeSort(arr, 0, len(arr) - 1);
 
