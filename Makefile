@@ -20,4 +20,4 @@ lex.yy.c: lexer.l
 	$(LEX) lexer.l
 
 clean:
-	rm -f $(EXEC) parser.tab.c parser.tab.h lex.yy.c
+	rm -f $(EXEC) parser.tab.* parser.output lex.yy.c

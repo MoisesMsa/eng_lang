@@ -1,0 +1,2582 @@
+Gramática
+
+    0 $accept: program $end
+
+    1 program: sub_programs
+    2        | structs
+
+    3 structs: STRUCT ID '{' declarations '}'
+    4        | STRUCT ID '{' declarations sub_programs '}'
+
+    5 declarations: declaration
+    6             | declaration declarations
+
+    7 declaration: ID ':' TYPE ';'
+    8            | ID ':' TYPE dms ';'
+    9            | ID ':' MATRIX ';'
+
+   10 sub_programs: sub_programs sub_program
+   11             | sub_program
+
+   12 sub_program: FUNCTION ID '(' param_list ')' ARROW TYPE block
+   13            | FUNCTION ID '(' param_list ')' block
+
+   14 param_list: param ',' param_list
+   15           | param
+
+   16 param: ID ':' TYPE
+   17      | ID ':' TYPE dms
+   18      | ε
+   19      | ID ':' MATRIX
+
+   20 block: '{' stmts_list '}'
+
+   21 stmts_list: stmt
+   22           | stmt stmts_list
+
+   23 stmt: ID ASSIGN expr ';'
+   24     | ID ':' TYPE ASSIGN expr ';'
+   25     | ID INCREMENT ';'
+   26     | ID DECREMENT ';'
+   27     | ID INCREMENT_ASSIGN expr ';'
+   28     | ID DECREMENT_ASSIGN expr ';'
+   29     | ID '(' args ')' ';'
+   30     | declaration
+   31     | if_stmt
+   32     | WHILE condition block
+   33     | FOR ID IN ID block
+   34     | stmt_array ';'
+   35     | stmt_matrix ';'
+
+   36 if_stmt: IF condition block elseif
+
+   37 elseif: ELSE IF condition block elseif
+   38       | ELSE block
+   39       | ε
+
+   40 stmt_array: ID '[' expr ':' expr ']' ASSIGN expr
+   41           | ID ':' TYPE dms ASSIGN expr
+   42           | ID dms_acess ASSIGN expr
+
+   43 stmt_matrix: ID ':' MATRIX ASSIGN expr
+   44            | ID ':' MATRIX '[' expr ']' ASSIGN expr
+   45            | ID matrix_twod ASSIGN expr
+
+   46 matrix_twod: '[' expr ']' '[' ']'
+   47            | '[' ']' '[' expr ']'
+
+   48 dms_acess: '[' expr ']'
+   49          | '[' expr ']' dms_acess
+
+   50 dms: '[' ']'
+   51    | '[' ']' dms
+
+   52 condition: expr LESS expr
+   53          | expr GREATER expr
+   54          | expr LESSEQUALS expr
+   55          | expr GREATEREQUALS expr
+   56          | expr EQUALS expr
+   57          | expr DIFF expr
+   58          | NOT condition
+   59          | condition AND condition
+   60          | condition OR condition
+   61          | ID
+   62          | BOOL
+   63          | ID '(' args ')' ';'
+
+   64 expr: expr PLUS term
+   65     | expr MINUS term
+   66     | term
+
+   67 term: term MULT factor
+   68     | term DIVISION factor
+   69     | factor
+
+   70 factor: exp EXPOENT factor
+   71       | exp
+
+   72 exp: '(' expr ')'
+   73    | ID
+   74    | NUMBER
+   75    | FLOAT
+   76    | STRING
+   77    | BOOL
+   78    | ID dms_acess
+   79    | ID '[' expr ':' expr ']'
+   80    | ID '(' args ')'
+   81    | '[' expr_list ']'
+   82    | dms
+   83    | ID INCREMENT
+   84    | ID DECREMENT
+   85    | ID matrix_twod
+
+   86 expr_list: expr
+   87          | expr ',' expr_list
+
+   88 args: ε
+   89     | expr
+   90     | expr ',' args
+
+
+Terminais, com as regras onde eles aparecem
+
+    $end (0) 0
+    '(' (40) 12 13 29 63 72 80
+    ')' (41) 12 13 29 63 72 80
+    ',' (44) 14 87 90
+    ':' (58) 7 8 9 16 17 19 24 40 41 43 44 79
+    ';' (59) 7 8 9 23 24 25 26 27 28 29 34 35 63
+    '[' (91) 40 44 46 47 48 49 50 51 79 81
+    ']' (93) 40 44 46 47 48 49 50 51 79 81
+    '{' (123) 3 4 20
+    '}' (125) 3 4 20
+    error (256)
+    ID <sValue> (258) 3 4 7 8 9 12 13 16 17 19 23 24 25 26 27 28 29 33 40 41 42 43 44 45 61 63 73 78 79 80 83 84 85
+    NUMBER <sValue> (259) 74
+    FLOAT <sValue> (260) 75
+    STRING <sValue> (261) 76
+    TYPE <sValue> (262) 7 8 12 16 17 24 41
+    BOOL <sValue> (263) 62 77
+    IF (264) 36 37
+    ELSE (265) 37 38
+    WHILE (266) 32
+    FOR (267) 33
+    IN (268) 33
+    ARROW (269) 12
+    ASSIGN (270) 23 24 40 41 42 43 44 45
+    FUNCTION (271) 12 13
+    PLUS (272) 64
+    MINUS (273) 65
+    MULT (274) 67
+    DIVISION (275) 68
+    EXPOENT (276) 70
+    AND (277) 59
+    OR (278) 60
+    NOT (279) 58
+    EQUALS (280) 56
+    DIFF (281) 57
+    LESS (282) 52
+    GREATER (283) 53
+    LESSEQUALS (284) 54
+    GREATEREQUALS (285) 55
+    INCREMENT (286) 25 83
+    DECREMENT (287) 26 84
+    INCREMENT_ASSIGN (288) 27
+    DECREMENT_ASSIGN (289) 28
+    MATRIX (290) 9 19 43 44
+    STRUCT (291) 3 4
+
+
+Não terminais com as regras onde eles aparecem
+
+    $accept (46)
+        à esquerda: 0
+    program (47)
+        à esquerda: 1 2
+        à direita: 0
+    structs <sValue> (48)
+        à esquerda: 3 4
+        à direita: 2
+    declarations <sValue> (49)
+        à esquerda: 5 6
+        à direita: 3 4 6
+    declaration <sValue> (50)
+        à esquerda: 7 8 9
+        à direita: 5 6 30
+    sub_programs <sValue> (51)
+        à esquerda: 10 11
+        à direita: 1 4 10
+    sub_program <sValue> (52)
+        à esquerda: 12 13
+        à direita: 10 11
+    param_list <sValue> (53)
+        à esquerda: 14 15
+        à direita: 12 13 14
+    param <sValue> (54)
+        à esquerda: 16 17 18 19
+        à direita: 14 15
+    block <sValue> (55)
+        à esquerda: 20
+        à direita: 12 13 32 33 36 37 38
+    stmts_list <sValue> (56)
+        à esquerda: 21 22
+        à direita: 20 22
+    stmt <sValue> (57)
+        à esquerda: 23 24 25 26 27 28 29 30 31 32 33 34 35
+        à direita: 21 22
+    if_stmt (58)
+        à esquerda: 36
+        à direita: 31
+    elseif (59)
+        à esquerda: 37 38 39
+        à direita: 36 37
+    stmt_array <sValue> (60)
+        à esquerda: 40 41 42
+        à direita: 34
+    stmt_matrix <sValue> (61)
+        à esquerda: 43 44 45
+        à direita: 35
+    matrix_twod <sValue> (62)
+        à esquerda: 46 47
+        à direita: 45 85
+    dms_acess <sValue> (63)
+        à esquerda: 48 49
+        à direita: 42 49 78
+    dms <sValue> (64)
+        à esquerda: 50 51
+        à direita: 8 17 41 51 82
+    condition <sValue> (65)
+        à esquerda: 52 53 54 55 56 57 58 59 60 61 62 63
+        à direita: 32 36 37 58 59 60
+    expr <sValue> (66)
+        à esquerda: 64 65 66
+        à direita: 23 24 27 28 40 41 42 43 44 45 46 47 48 49 52 53 54 55 56 57 64 65 72 79 86 87 89 90
+    term <sValue> (67)
+        à esquerda: 67 68 69
+        à direita: 64 65 66 67 68
+    factor <sValue> (68)
+        à esquerda: 70 71
+        à direita: 67 68 69 70
+    exp <sValue> (69)
+        à esquerda: 72 73 74 75 76 77 78 79 80 81 82 83 84 85
+        à direita: 70 71
+    expr_list <sValue> (70)
+        à esquerda: 86 87
+        à direita: 81 87
+    args <sValue> (71)
+        à esquerda: 88 89 90
+        à direita: 29 63 80 90
+
+
+Estado 0
+
+    0 $accept: • program $end
+
+    FUNCTION  deslocar, e ir ao estado 1
+    STRUCT    deslocar, e ir ao estado 2
+
+    program       ir ao estado 3
+    structs       ir ao estado 4
+    sub_programs  ir ao estado 5
+    sub_program   ir ao estado 6
+
+
+Estado 1
+
+   12 sub_program: FUNCTION • ID '(' param_list ')' ARROW TYPE block
+   13            | FUNCTION • ID '(' param_list ')' block
+
+    ID  deslocar, e ir ao estado 7
+
+
+Estado 2
+
+    3 structs: STRUCT • ID '{' declarations '}'
+    4        | STRUCT • ID '{' declarations sub_programs '}'
+
+    ID  deslocar, e ir ao estado 8
+
+
+Estado 3
+
+    0 $accept: program • $end
+
+    $end  deslocar, e ir ao estado 9
+
+
+Estado 4
+
+    2 program: structs •
+
+    $padrão  reduzir usando a regra 2 (program)
+
+
+Estado 5
+
+    1 program: sub_programs •
+   10 sub_programs: sub_programs • sub_program
+
+    FUNCTION  deslocar, e ir ao estado 1
+
+    $padrão  reduzir usando a regra 1 (program)
+
+    sub_program  ir ao estado 10
+
+
+Estado 6
+
+   11 sub_programs: sub_program •
+
+    $padrão  reduzir usando a regra 11 (sub_programs)
+
+
+Estado 7
+
+   12 sub_program: FUNCTION ID • '(' param_list ')' ARROW TYPE block
+   13            | FUNCTION ID • '(' param_list ')' block
+
+    '('  deslocar, e ir ao estado 11
+
+
+Estado 8
+
+    3 structs: STRUCT ID • '{' declarations '}'
+    4        | STRUCT ID • '{' declarations sub_programs '}'
+
+    '{'  deslocar, e ir ao estado 12
+
+
+Estado 9
+
+    0 $accept: program $end •
+
+    $padrão  aceitar
+
+
+Estado 10
+
+   10 sub_programs: sub_programs sub_program •
+
+    $padrão  reduzir usando a regra 10 (sub_programs)
+
+
+Estado 11
+
+   12 sub_program: FUNCTION ID '(' • param_list ')' ARROW TYPE block
+   13            | FUNCTION ID '(' • param_list ')' block
+
+    ID  deslocar, e ir ao estado 13
+
+    $padrão  reduzir usando a regra 18 (param)
+
+    param_list  ir ao estado 14
+    param       ir ao estado 15
+
+
+Estado 12
+
+    3 structs: STRUCT ID '{' • declarations '}'
+    4        | STRUCT ID '{' • declarations sub_programs '}'
+
+    ID  deslocar, e ir ao estado 16
+
+    declarations  ir ao estado 17
+    declaration   ir ao estado 18
+
+
+Estado 13
+
+   16 param: ID • ':' TYPE
+   17      | ID • ':' TYPE dms
+   19      | ID • ':' MATRIX
+
+    ':'  deslocar, e ir ao estado 19
+
+
+Estado 14
+
+   12 sub_program: FUNCTION ID '(' param_list • ')' ARROW TYPE block
+   13            | FUNCTION ID '(' param_list • ')' block
+
+    ')'  deslocar, e ir ao estado 20
+
+
+Estado 15
+
+   14 param_list: param • ',' param_list
+   15           | param •
+
+    ','  deslocar, e ir ao estado 21
+
+    $padrão  reduzir usando a regra 15 (param_list)
+
+
+Estado 16
+
+    7 declaration: ID • ':' TYPE ';'
+    8            | ID • ':' TYPE dms ';'
+    9            | ID • ':' MATRIX ';'
+
+    ':'  deslocar, e ir ao estado 22
+
+
+Estado 17
+
+    3 structs: STRUCT ID '{' declarations • '}'
+    4        | STRUCT ID '{' declarations • sub_programs '}'
+
+    FUNCTION  deslocar, e ir ao estado 1
+    '}'       deslocar, e ir ao estado 23
+
+    sub_programs  ir ao estado 24
+    sub_program   ir ao estado 6
+
+
+Estado 18
+
+    5 declarations: declaration •
+    6             | declaration • declarations
+
+    ID  deslocar, e ir ao estado 16
+
+    $padrão  reduzir usando a regra 5 (declarations)
+
+    declarations  ir ao estado 25
+    declaration   ir ao estado 18
+
+
+Estado 19
+
+   16 param: ID ':' • TYPE
+   17      | ID ':' • TYPE dms
+   19      | ID ':' • MATRIX
+
+    TYPE    deslocar, e ir ao estado 26
+    MATRIX  deslocar, e ir ao estado 27
+
+
+Estado 20
+
+   12 sub_program: FUNCTION ID '(' param_list ')' • ARROW TYPE block
+   13            | FUNCTION ID '(' param_list ')' • block
+
+    ARROW  deslocar, e ir ao estado 28
+    '{'    deslocar, e ir ao estado 29
+
+    block  ir ao estado 30
+
+
+Estado 21
+
+   14 param_list: param ',' • param_list
+
+    ID  deslocar, e ir ao estado 13
+
+    $padrão  reduzir usando a regra 18 (param)
+
+    param_list  ir ao estado 31
+    param       ir ao estado 15
+
+
+Estado 22
+
+    7 declaration: ID ':' • TYPE ';'
+    8            | ID ':' • TYPE dms ';'
+    9            | ID ':' • MATRIX ';'
+
+    TYPE    deslocar, e ir ao estado 32
+    MATRIX  deslocar, e ir ao estado 33
+
+
+Estado 23
+
+    3 structs: STRUCT ID '{' declarations '}' •
+
+    $padrão  reduzir usando a regra 3 (structs)
+
+
+Estado 24
+
+    4 structs: STRUCT ID '{' declarations sub_programs • '}'
+   10 sub_programs: sub_programs • sub_program
+
+    FUNCTION  deslocar, e ir ao estado 1
+    '}'       deslocar, e ir ao estado 34
+
+    sub_program  ir ao estado 10
+
+
+Estado 25
+
+    6 declarations: declaration declarations •
+
+    $padrão  reduzir usando a regra 6 (declarations)
+
+
+Estado 26
+
+   16 param: ID ':' TYPE •
+   17      | ID ':' TYPE • dms
+
+    '['  deslocar, e ir ao estado 35
+
+    $padrão  reduzir usando a regra 16 (param)
+
+    dms  ir ao estado 36
+
+
+Estado 27
+
+   19 param: ID ':' MATRIX •
+
+    $padrão  reduzir usando a regra 19 (param)
+
+
+Estado 28
+
+   12 sub_program: FUNCTION ID '(' param_list ')' ARROW • TYPE block
+
+    TYPE  deslocar, e ir ao estado 37
+
+
+Estado 29
+
+   20 block: '{' • stmts_list '}'
+
+    ID     deslocar, e ir ao estado 38
+    IF     deslocar, e ir ao estado 39
+    WHILE  deslocar, e ir ao estado 40
+    FOR    deslocar, e ir ao estado 41
+
+    declaration  ir ao estado 42
+    stmts_list   ir ao estado 43
+    stmt         ir ao estado 44
+    if_stmt      ir ao estado 45
+    stmt_array   ir ao estado 46
+    stmt_matrix  ir ao estado 47
+
+
+Estado 30
+
+   13 sub_program: FUNCTION ID '(' param_list ')' block •
+
+    $padrão  reduzir usando a regra 13 (sub_program)
+
+
+Estado 31
+
+   14 param_list: param ',' param_list •
+
+    $padrão  reduzir usando a regra 14 (param_list)
+
+
+Estado 32
+
+    7 declaration: ID ':' TYPE • ';'
+    8            | ID ':' TYPE • dms ';'
+
+    ';'  deslocar, e ir ao estado 48
+    '['  deslocar, e ir ao estado 35
+
+    dms  ir ao estado 49
+
+
+Estado 33
+
+    9 declaration: ID ':' MATRIX • ';'
+
+    ';'  deslocar, e ir ao estado 50
+
+
+Estado 34
+
+    4 structs: STRUCT ID '{' declarations sub_programs '}' •
+
+    $padrão  reduzir usando a regra 4 (structs)
+
+
+Estado 35
+
+   50 dms: '[' • ']'
+   51    | '[' • ']' dms
+
+    ']'  deslocar, e ir ao estado 51
+
+
+Estado 36
+
+   17 param: ID ':' TYPE dms •
+
+    $padrão  reduzir usando a regra 17 (param)
+
+
+Estado 37
+
+   12 sub_program: FUNCTION ID '(' param_list ')' ARROW TYPE • block
+
+    '{'  deslocar, e ir ao estado 29
+
+    block  ir ao estado 52
+
+
+Estado 38
+
+    7 declaration: ID • ':' TYPE ';'
+    8            | ID • ':' TYPE dms ';'
+    9            | ID • ':' MATRIX ';'
+   23 stmt: ID • ASSIGN expr ';'
+   24     | ID • ':' TYPE ASSIGN expr ';'
+   25     | ID • INCREMENT ';'
+   26     | ID • DECREMENT ';'
+   27     | ID • INCREMENT_ASSIGN expr ';'
+   28     | ID • DECREMENT_ASSIGN expr ';'
+   29     | ID • '(' args ')' ';'
+   40 stmt_array: ID • '[' expr ':' expr ']' ASSIGN expr
+   41           | ID • ':' TYPE dms ASSIGN expr
+   42           | ID • dms_acess ASSIGN expr
+   43 stmt_matrix: ID • ':' MATRIX ASSIGN expr
+   44            | ID • ':' MATRIX '[' expr ']' ASSIGN expr
+   45            | ID • matrix_twod ASSIGN expr
+
+    ASSIGN            deslocar, e ir ao estado 53
+    INCREMENT         deslocar, e ir ao estado 54
+    DECREMENT         deslocar, e ir ao estado 55
+    INCREMENT_ASSIGN  deslocar, e ir ao estado 56
+    DECREMENT_ASSIGN  deslocar, e ir ao estado 57
+    ':'               deslocar, e ir ao estado 58
+    '('               deslocar, e ir ao estado 59
+    '['               deslocar, e ir ao estado 60
+
+    matrix_twod  ir ao estado 61
+    dms_acess    ir ao estado 62
+
+
+Estado 39
+
+   36 if_stmt: IF • condition block elseif
+
+    ID      deslocar, e ir ao estado 63
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 67
+    NOT     deslocar, e ir ao estado 68
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    condition  ir ao estado 72
+    expr       ir ao estado 73
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+
+
+Estado 40
+
+   32 stmt: WHILE • condition block
+
+    ID      deslocar, e ir ao estado 63
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 67
+    NOT     deslocar, e ir ao estado 68
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    condition  ir ao estado 77
+    expr       ir ao estado 73
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+
+
+Estado 41
+
+   33 stmt: FOR • ID IN ID block
+
+    ID  deslocar, e ir ao estado 78
+
+
+Estado 42
+
+   30 stmt: declaration •
+
+    $padrão  reduzir usando a regra 30 (stmt)
+
+
+Estado 43
+
+   20 block: '{' stmts_list • '}'
+
+    '}'  deslocar, e ir ao estado 79
+
+
+Estado 44
+
+   21 stmts_list: stmt •
+   22           | stmt • stmts_list
+
+    ID     deslocar, e ir ao estado 38
+    IF     deslocar, e ir ao estado 39
+    WHILE  deslocar, e ir ao estado 40
+    FOR    deslocar, e ir ao estado 41
+
+    $padrão  reduzir usando a regra 21 (stmts_list)
+
+    declaration  ir ao estado 42
+    stmts_list   ir ao estado 80
+    stmt         ir ao estado 44
+    if_stmt      ir ao estado 45
+    stmt_array   ir ao estado 46
+    stmt_matrix  ir ao estado 47
+
+
+Estado 45
+
+   31 stmt: if_stmt •
+
+    $padrão  reduzir usando a regra 31 (stmt)
+
+
+Estado 46
+
+   34 stmt: stmt_array • ';'
+
+    ';'  deslocar, e ir ao estado 81
+
+
+Estado 47
+
+   35 stmt: stmt_matrix • ';'
+
+    ';'  deslocar, e ir ao estado 82
+
+
+Estado 48
+
+    7 declaration: ID ':' TYPE ';' •
+
+    $padrão  reduzir usando a regra 7 (declaration)
+
+
+Estado 49
+
+    8 declaration: ID ':' TYPE dms • ';'
+
+    ';'  deslocar, e ir ao estado 83
+
+
+Estado 50
+
+    9 declaration: ID ':' MATRIX ';' •
+
+    $padrão  reduzir usando a regra 9 (declaration)
+
+
+Estado 51
+
+   50 dms: '[' ']' •
+   51    | '[' ']' • dms
+
+    '['  deslocar, e ir ao estado 35
+
+    $padrão  reduzir usando a regra 50 (dms)
+
+    dms  ir ao estado 84
+
+
+Estado 52
+
+   12 sub_program: FUNCTION ID '(' param_list ')' ARROW TYPE block •
+
+    $padrão  reduzir usando a regra 12 (sub_program)
+
+
+Estado 53
+
+   23 stmt: ID ASSIGN • expr ';'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 87
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 54
+
+   25 stmt: ID INCREMENT • ';'
+
+    ';'  deslocar, e ir ao estado 88
+
+
+Estado 55
+
+   26 stmt: ID DECREMENT • ';'
+
+    ';'  deslocar, e ir ao estado 89
+
+
+Estado 56
+
+   27 stmt: ID INCREMENT_ASSIGN • expr ';'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 90
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 57
+
+   28 stmt: ID DECREMENT_ASSIGN • expr ';'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 91
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 58
+
+    7 declaration: ID ':' • TYPE ';'
+    8            | ID ':' • TYPE dms ';'
+    9            | ID ':' • MATRIX ';'
+   24 stmt: ID ':' • TYPE ASSIGN expr ';'
+   41 stmt_array: ID ':' • TYPE dms ASSIGN expr
+   43 stmt_matrix: ID ':' • MATRIX ASSIGN expr
+   44            | ID ':' • MATRIX '[' expr ']' ASSIGN expr
+
+    TYPE    deslocar, e ir ao estado 92
+    MATRIX  deslocar, e ir ao estado 93
+
+
+Estado 59
+
+   29 stmt: ID '(' • args ')' ';'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    $padrão  reduzir usando a regra 88 (args)
+
+    dms     ir ao estado 71
+    expr    ir ao estado 94
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+    args    ir ao estado 95
+
+
+Estado 60
+
+   40 stmt_array: ID '[' • expr ':' expr ']' ASSIGN expr
+   46 matrix_twod: '[' • expr ']' '[' ']'
+   47            | '[' • ']' '[' expr ']'
+   48 dms_acess: '[' • expr ']'
+   49          | '[' • expr ']' dms_acess
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+    ']'     deslocar, e ir ao estado 96
+
+    dms     ir ao estado 71
+    expr    ir ao estado 97
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 61
+
+   45 stmt_matrix: ID matrix_twod • ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 98
+
+
+Estado 62
+
+   42 stmt_array: ID dms_acess • ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 99
+
+
+Estado 63
+
+   61 condition: ID •
+   63          | ID • '(' args ')' ';'
+   73 exp: ID •
+   78    | ID • dms_acess
+   79    | ID • '[' expr ':' expr ']'
+   80    | ID • '(' args ')'
+   83    | ID • INCREMENT
+   84    | ID • DECREMENT
+   85    | ID • matrix_twod
+
+    INCREMENT  deslocar, e ir ao estado 100
+    DECREMENT  deslocar, e ir ao estado 101
+    '('        deslocar, e ir ao estado 102
+    '['        deslocar, e ir ao estado 103
+
+    AND      reduzir usando a regra 61 (condition)
+    OR       reduzir usando a regra 61 (condition)
+    '{'      reduzir usando a regra 61 (condition)
+    $padrão  reduzir usando a regra 73 (exp)
+
+    matrix_twod  ir ao estado 104
+    dms_acess    ir ao estado 105
+
+
+Estado 64
+
+   74 exp: NUMBER •
+
+    $padrão  reduzir usando a regra 74 (exp)
+
+
+Estado 65
+
+   75 exp: FLOAT •
+
+    $padrão  reduzir usando a regra 75 (exp)
+
+
+Estado 66
+
+   76 exp: STRING •
+
+    $padrão  reduzir usando a regra 76 (exp)
+
+
+Estado 67
+
+   62 condition: BOOL •
+   77 exp: BOOL •
+
+    AND      reduzir usando a regra 62 (condition)
+    OR       reduzir usando a regra 62 (condition)
+    '{'      reduzir usando a regra 62 (condition)
+    $padrão  reduzir usando a regra 77 (exp)
+
+
+Estado 68
+
+   58 condition: NOT • condition
+
+    ID      deslocar, e ir ao estado 63
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 67
+    NOT     deslocar, e ir ao estado 68
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    condition  ir ao estado 106
+    expr       ir ao estado 73
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+
+
+Estado 69
+
+   72 exp: '(' • expr ')'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 107
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 70
+
+   50 dms: '[' • ']'
+   51    | '[' • ']' dms
+   81 exp: '[' • expr_list ']'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+    ']'     deslocar, e ir ao estado 51
+
+    dms        ir ao estado 71
+    expr       ir ao estado 108
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+    expr_list  ir ao estado 109
+
+
+Estado 71
+
+   82 exp: dms •
+
+    $padrão  reduzir usando a regra 82 (exp)
+
+
+Estado 72
+
+   36 if_stmt: IF condition • block elseif
+   59 condition: condition • AND condition
+   60          | condition • OR condition
+
+    AND  deslocar, e ir ao estado 110
+    OR   deslocar, e ir ao estado 111
+    '{'  deslocar, e ir ao estado 29
+
+    block  ir ao estado 112
+
+
+Estado 73
+
+   52 condition: expr • LESS expr
+   53          | expr • GREATER expr
+   54          | expr • LESSEQUALS expr
+   55          | expr • GREATEREQUALS expr
+   56          | expr • EQUALS expr
+   57          | expr • DIFF expr
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS           deslocar, e ir ao estado 113
+    MINUS          deslocar, e ir ao estado 114
+    EQUALS         deslocar, e ir ao estado 115
+    DIFF           deslocar, e ir ao estado 116
+    LESS           deslocar, e ir ao estado 117
+    GREATER        deslocar, e ir ao estado 118
+    LESSEQUALS     deslocar, e ir ao estado 119
+    GREATEREQUALS  deslocar, e ir ao estado 120
+
+
+Estado 74
+
+   66 expr: term •
+   67 term: term • MULT factor
+   68     | term • DIVISION factor
+
+    MULT      deslocar, e ir ao estado 121
+    DIVISION  deslocar, e ir ao estado 122
+
+    $padrão  reduzir usando a regra 66 (expr)
+
+
+Estado 75
+
+   69 term: factor •
+
+    $padrão  reduzir usando a regra 69 (term)
+
+
+Estado 76
+
+   70 factor: exp • EXPOENT factor
+   71       | exp •
+
+    EXPOENT  deslocar, e ir ao estado 123
+
+    $padrão  reduzir usando a regra 71 (factor)
+
+
+Estado 77
+
+   32 stmt: WHILE condition • block
+   59 condition: condition • AND condition
+   60          | condition • OR condition
+
+    AND  deslocar, e ir ao estado 110
+    OR   deslocar, e ir ao estado 111
+    '{'  deslocar, e ir ao estado 29
+
+    block  ir ao estado 124
+
+
+Estado 78
+
+   33 stmt: FOR ID • IN ID block
+
+    IN  deslocar, e ir ao estado 125
+
+
+Estado 79
+
+   20 block: '{' stmts_list '}' •
+
+    $padrão  reduzir usando a regra 20 (block)
+
+
+Estado 80
+
+   22 stmts_list: stmt stmts_list •
+
+    $padrão  reduzir usando a regra 22 (stmts_list)
+
+
+Estado 81
+
+   34 stmt: stmt_array ';' •
+
+    $padrão  reduzir usando a regra 34 (stmt)
+
+
+Estado 82
+
+   35 stmt: stmt_matrix ';' •
+
+    $padrão  reduzir usando a regra 35 (stmt)
+
+
+Estado 83
+
+    8 declaration: ID ':' TYPE dms ';' •
+
+    $padrão  reduzir usando a regra 8 (declaration)
+
+
+Estado 84
+
+   51 dms: '[' ']' dms •
+
+    $padrão  reduzir usando a regra 51 (dms)
+
+
+Estado 85
+
+   73 exp: ID •
+   78    | ID • dms_acess
+   79    | ID • '[' expr ':' expr ']'
+   80    | ID • '(' args ')'
+   83    | ID • INCREMENT
+   84    | ID • DECREMENT
+   85    | ID • matrix_twod
+
+    INCREMENT  deslocar, e ir ao estado 100
+    DECREMENT  deslocar, e ir ao estado 101
+    '('        deslocar, e ir ao estado 126
+    '['        deslocar, e ir ao estado 103
+
+    $padrão  reduzir usando a regra 73 (exp)
+
+    matrix_twod  ir ao estado 104
+    dms_acess    ir ao estado 105
+
+
+Estado 86
+
+   77 exp: BOOL •
+
+    $padrão  reduzir usando a regra 77 (exp)
+
+
+Estado 87
+
+   23 stmt: ID ASSIGN expr • ';'
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ';'    deslocar, e ir ao estado 127
+
+
+Estado 88
+
+   25 stmt: ID INCREMENT ';' •
+
+    $padrão  reduzir usando a regra 25 (stmt)
+
+
+Estado 89
+
+   26 stmt: ID DECREMENT ';' •
+
+    $padrão  reduzir usando a regra 26 (stmt)
+
+
+Estado 90
+
+   27 stmt: ID INCREMENT_ASSIGN expr • ';'
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ';'    deslocar, e ir ao estado 128
+
+
+Estado 91
+
+   28 stmt: ID DECREMENT_ASSIGN expr • ';'
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ';'    deslocar, e ir ao estado 129
+
+
+Estado 92
+
+    7 declaration: ID ':' TYPE • ';'
+    8            | ID ':' TYPE • dms ';'
+   24 stmt: ID ':' TYPE • ASSIGN expr ';'
+   41 stmt_array: ID ':' TYPE • dms ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 130
+    ';'     deslocar, e ir ao estado 48
+    '['     deslocar, e ir ao estado 35
+
+    dms  ir ao estado 131
+
+
+Estado 93
+
+    9 declaration: ID ':' MATRIX • ';'
+   43 stmt_matrix: ID ':' MATRIX • ASSIGN expr
+   44            | ID ':' MATRIX • '[' expr ']' ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 132
+    ';'     deslocar, e ir ao estado 50
+    '['     deslocar, e ir ao estado 133
+
+
+Estado 94
+
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+   89 args: expr •
+   90     | expr • ',' args
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ','    deslocar, e ir ao estado 134
+
+    $padrão  reduzir usando a regra 89 (args)
+
+
+Estado 95
+
+   29 stmt: ID '(' args • ')' ';'
+
+    ')'  deslocar, e ir ao estado 135
+
+
+Estado 96
+
+   47 matrix_twod: '[' ']' • '[' expr ']'
+
+    '['  deslocar, e ir ao estado 136
+
+
+Estado 97
+
+   40 stmt_array: ID '[' expr • ':' expr ']' ASSIGN expr
+   46 matrix_twod: '[' expr • ']' '[' ']'
+   48 dms_acess: '[' expr • ']'
+   49          | '[' expr • ']' dms_acess
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ':'    deslocar, e ir ao estado 137
+    ']'    deslocar, e ir ao estado 138
+
+
+Estado 98
+
+   45 stmt_matrix: ID matrix_twod ASSIGN • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 139
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 99
+
+   42 stmt_array: ID dms_acess ASSIGN • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 140
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 100
+
+   83 exp: ID INCREMENT •
+
+    $padrão  reduzir usando a regra 83 (exp)
+
+
+Estado 101
+
+   84 exp: ID DECREMENT •
+
+    $padrão  reduzir usando a regra 84 (exp)
+
+
+Estado 102
+
+   63 condition: ID '(' • args ')' ';'
+   80 exp: ID '(' • args ')'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    $padrão  reduzir usando a regra 88 (args)
+
+    dms     ir ao estado 71
+    expr    ir ao estado 94
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+    args    ir ao estado 141
+
+
+Estado 103
+
+   46 matrix_twod: '[' • expr ']' '[' ']'
+   47            | '[' • ']' '[' expr ']'
+   48 dms_acess: '[' • expr ']'
+   49          | '[' • expr ']' dms_acess
+   79 exp: ID '[' • expr ':' expr ']'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+    ']'     deslocar, e ir ao estado 96
+
+    dms     ir ao estado 71
+    expr    ir ao estado 142
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 104
+
+   85 exp: ID matrix_twod •
+
+    $padrão  reduzir usando a regra 85 (exp)
+
+
+Estado 105
+
+   78 exp: ID dms_acess •
+
+    $padrão  reduzir usando a regra 78 (exp)
+
+
+Estado 106
+
+   58 condition: NOT condition •
+   59          | condition • AND condition
+   60          | condition • OR condition
+
+    $padrão  reduzir usando a regra 58 (condition)
+
+
+Estado 107
+
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+   72 exp: '(' expr • ')'
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ')'    deslocar, e ir ao estado 143
+
+
+Estado 108
+
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+   86 expr_list: expr •
+   87          | expr • ',' expr_list
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ','    deslocar, e ir ao estado 144
+
+    $padrão  reduzir usando a regra 86 (expr_list)
+
+
+Estado 109
+
+   81 exp: '[' expr_list • ']'
+
+    ']'  deslocar, e ir ao estado 145
+
+
+Estado 110
+
+   59 condition: condition AND • condition
+
+    ID      deslocar, e ir ao estado 63
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 67
+    NOT     deslocar, e ir ao estado 68
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    condition  ir ao estado 146
+    expr       ir ao estado 73
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+
+
+Estado 111
+
+   60 condition: condition OR • condition
+
+    ID      deslocar, e ir ao estado 63
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 67
+    NOT     deslocar, e ir ao estado 68
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    condition  ir ao estado 147
+    expr       ir ao estado 73
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+
+
+Estado 112
+
+   36 if_stmt: IF condition block • elseif
+
+    ELSE  deslocar, e ir ao estado 148
+
+    $padrão  reduzir usando a regra 39 (elseif)
+
+    elseif  ir ao estado 149
+
+
+Estado 113
+
+   64 expr: expr PLUS • term
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    term    ir ao estado 150
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 114
+
+   65 expr: expr MINUS • term
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    term    ir ao estado 151
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 115
+
+   56 condition: expr EQUALS • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 152
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 116
+
+   57 condition: expr DIFF • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 153
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 117
+
+   52 condition: expr LESS • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 154
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 118
+
+   53 condition: expr GREATER • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 155
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 119
+
+   54 condition: expr LESSEQUALS • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 156
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 120
+
+   55 condition: expr GREATEREQUALS • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 157
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 121
+
+   67 term: term MULT • factor
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    factor  ir ao estado 158
+    exp     ir ao estado 76
+
+
+Estado 122
+
+   68 term: term DIVISION • factor
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    factor  ir ao estado 159
+    exp     ir ao estado 76
+
+
+Estado 123
+
+   70 factor: exp EXPOENT • factor
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    factor  ir ao estado 160
+    exp     ir ao estado 76
+
+
+Estado 124
+
+   32 stmt: WHILE condition block •
+
+    $padrão  reduzir usando a regra 32 (stmt)
+
+
+Estado 125
+
+   33 stmt: FOR ID IN • ID block
+
+    ID  deslocar, e ir ao estado 161
+
+
+Estado 126
+
+   80 exp: ID '(' • args ')'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    $padrão  reduzir usando a regra 88 (args)
+
+    dms     ir ao estado 71
+    expr    ir ao estado 94
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+    args    ir ao estado 162
+
+
+Estado 127
+
+   23 stmt: ID ASSIGN expr ';' •
+
+    $padrão  reduzir usando a regra 23 (stmt)
+
+
+Estado 128
+
+   27 stmt: ID INCREMENT_ASSIGN expr ';' •
+
+    $padrão  reduzir usando a regra 27 (stmt)
+
+
+Estado 129
+
+   28 stmt: ID DECREMENT_ASSIGN expr ';' •
+
+    $padrão  reduzir usando a regra 28 (stmt)
+
+
+Estado 130
+
+   24 stmt: ID ':' TYPE ASSIGN • expr ';'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 163
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 131
+
+    8 declaration: ID ':' TYPE dms • ';'
+   41 stmt_array: ID ':' TYPE dms • ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 164
+    ';'     deslocar, e ir ao estado 83
+
+
+Estado 132
+
+   43 stmt_matrix: ID ':' MATRIX ASSIGN • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 165
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 133
+
+   44 stmt_matrix: ID ':' MATRIX '[' • expr ']' ASSIGN expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 166
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 134
+
+   90 args: expr ',' • args
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    $padrão  reduzir usando a regra 88 (args)
+
+    dms     ir ao estado 71
+    expr    ir ao estado 94
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+    args    ir ao estado 167
+
+
+Estado 135
+
+   29 stmt: ID '(' args ')' • ';'
+
+    ';'  deslocar, e ir ao estado 168
+
+
+Estado 136
+
+   47 matrix_twod: '[' ']' '[' • expr ']'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 169
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 137
+
+   40 stmt_array: ID '[' expr ':' • expr ']' ASSIGN expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 170
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 138
+
+   46 matrix_twod: '[' expr ']' • '[' ']'
+   48 dms_acess: '[' expr ']' •
+   49          | '[' expr ']' • dms_acess
+
+    '['  deslocar, e ir ao estado 171
+
+    $padrão  reduzir usando a regra 48 (dms_acess)
+
+    dms_acess  ir ao estado 172
+
+
+Estado 139
+
+   45 stmt_matrix: ID matrix_twod ASSIGN expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 45 (stmt_matrix)
+
+
+Estado 140
+
+   42 stmt_array: ID dms_acess ASSIGN expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 42 (stmt_array)
+
+
+Estado 141
+
+   63 condition: ID '(' args • ')' ';'
+   80 exp: ID '(' args • ')'
+
+    ')'  deslocar, e ir ao estado 173
+
+
+Estado 142
+
+   46 matrix_twod: '[' expr • ']' '[' ']'
+   48 dms_acess: '[' expr • ']'
+   49          | '[' expr • ']' dms_acess
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+   79 exp: ID '[' expr • ':' expr ']'
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ':'    deslocar, e ir ao estado 174
+    ']'    deslocar, e ir ao estado 138
+
+
+Estado 143
+
+   72 exp: '(' expr ')' •
+
+    $padrão  reduzir usando a regra 72 (exp)
+
+
+Estado 144
+
+   87 expr_list: expr ',' • expr_list
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    expr       ir ao estado 108
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+    expr_list  ir ao estado 175
+
+
+Estado 145
+
+   81 exp: '[' expr_list ']' •
+
+    $padrão  reduzir usando a regra 81 (exp)
+
+
+Estado 146
+
+   59 condition: condition • AND condition
+   59          | condition AND condition •
+   60          | condition • OR condition
+
+    $padrão  reduzir usando a regra 59 (condition)
+
+
+Estado 147
+
+   59 condition: condition • AND condition
+   60          | condition • OR condition
+   60          | condition OR condition •
+
+    $padrão  reduzir usando a regra 60 (condition)
+
+
+Estado 148
+
+   37 elseif: ELSE • IF condition block elseif
+   38       | ELSE • block
+
+    IF   deslocar, e ir ao estado 176
+    '{'  deslocar, e ir ao estado 29
+
+    block  ir ao estado 177
+
+
+Estado 149
+
+   36 if_stmt: IF condition block elseif •
+
+    $padrão  reduzir usando a regra 36 (if_stmt)
+
+
+Estado 150
+
+   64 expr: expr PLUS term •
+   67 term: term • MULT factor
+   68     | term • DIVISION factor
+
+    MULT      deslocar, e ir ao estado 121
+    DIVISION  deslocar, e ir ao estado 122
+
+    $padrão  reduzir usando a regra 64 (expr)
+
+
+Estado 151
+
+   65 expr: expr MINUS term •
+   67 term: term • MULT factor
+   68     | term • DIVISION factor
+
+    MULT      deslocar, e ir ao estado 121
+    DIVISION  deslocar, e ir ao estado 122
+
+    $padrão  reduzir usando a regra 65 (expr)
+
+
+Estado 152
+
+   56 condition: expr EQUALS expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 56 (condition)
+
+
+Estado 153
+
+   57 condition: expr DIFF expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 57 (condition)
+
+
+Estado 154
+
+   52 condition: expr LESS expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 52 (condition)
+
+
+Estado 155
+
+   53 condition: expr GREATER expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 53 (condition)
+
+
+Estado 156
+
+   54 condition: expr LESSEQUALS expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 54 (condition)
+
+
+Estado 157
+
+   55 condition: expr GREATEREQUALS expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 55 (condition)
+
+
+Estado 158
+
+   67 term: term MULT factor •
+
+    $padrão  reduzir usando a regra 67 (term)
+
+
+Estado 159
+
+   68 term: term DIVISION factor •
+
+    $padrão  reduzir usando a regra 68 (term)
+
+
+Estado 160
+
+   70 factor: exp EXPOENT factor •
+
+    $padrão  reduzir usando a regra 70 (factor)
+
+
+Estado 161
+
+   33 stmt: FOR ID IN ID • block
+
+    '{'  deslocar, e ir ao estado 29
+
+    block  ir ao estado 178
+
+
+Estado 162
+
+   80 exp: ID '(' args • ')'
+
+    ')'  deslocar, e ir ao estado 179
+
+
+Estado 163
+
+   24 stmt: ID ':' TYPE ASSIGN expr • ';'
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ';'    deslocar, e ir ao estado 180
+
+
+Estado 164
+
+   41 stmt_array: ID ':' TYPE dms ASSIGN • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 181
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 165
+
+   43 stmt_matrix: ID ':' MATRIX ASSIGN expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 43 (stmt_matrix)
+
+
+Estado 166
+
+   44 stmt_matrix: ID ':' MATRIX '[' expr • ']' ASSIGN expr
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ']'    deslocar, e ir ao estado 182
+
+
+Estado 167
+
+   90 args: expr ',' args •
+
+    $padrão  reduzir usando a regra 90 (args)
+
+
+Estado 168
+
+   29 stmt: ID '(' args ')' ';' •
+
+    $padrão  reduzir usando a regra 29 (stmt)
+
+
+Estado 169
+
+   47 matrix_twod: '[' ']' '[' expr • ']'
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ']'    deslocar, e ir ao estado 183
+
+
+Estado 170
+
+   40 stmt_array: ID '[' expr ':' expr • ']' ASSIGN expr
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ']'    deslocar, e ir ao estado 184
+
+
+Estado 171
+
+   46 matrix_twod: '[' expr ']' '[' • ']'
+   48 dms_acess: '[' • expr ']'
+   49          | '[' • expr ']' dms_acess
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+    ']'     deslocar, e ir ao estado 185
+
+    dms     ir ao estado 71
+    expr    ir ao estado 186
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 172
+
+   49 dms_acess: '[' expr ']' dms_acess •
+
+    $padrão  reduzir usando a regra 49 (dms_acess)
+
+
+Estado 173
+
+   63 condition: ID '(' args ')' • ';'
+   80 exp: ID '(' args ')' •
+
+    ';'  deslocar, e ir ao estado 187
+
+    $padrão  reduzir usando a regra 80 (exp)
+
+
+Estado 174
+
+   79 exp: ID '[' expr ':' • expr ']'
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 188
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 175
+
+   87 expr_list: expr ',' expr_list •
+
+    $padrão  reduzir usando a regra 87 (expr_list)
+
+
+Estado 176
+
+   37 elseif: ELSE IF • condition block elseif
+
+    ID      deslocar, e ir ao estado 63
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 67
+    NOT     deslocar, e ir ao estado 68
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms        ir ao estado 71
+    condition  ir ao estado 189
+    expr       ir ao estado 73
+    term       ir ao estado 74
+    factor     ir ao estado 75
+    exp        ir ao estado 76
+
+
+Estado 177
+
+   38 elseif: ELSE block •
+
+    $padrão  reduzir usando a regra 38 (elseif)
+
+
+Estado 178
+
+   33 stmt: FOR ID IN ID block •
+
+    $padrão  reduzir usando a regra 33 (stmt)
+
+
+Estado 179
+
+   80 exp: ID '(' args ')' •
+
+    $padrão  reduzir usando a regra 80 (exp)
+
+
+Estado 180
+
+   24 stmt: ID ':' TYPE ASSIGN expr ';' •
+
+    $padrão  reduzir usando a regra 24 (stmt)
+
+
+Estado 181
+
+   41 stmt_array: ID ':' TYPE dms ASSIGN expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 41 (stmt_array)
+
+
+Estado 182
+
+   44 stmt_matrix: ID ':' MATRIX '[' expr ']' • ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 190
+
+
+Estado 183
+
+   47 matrix_twod: '[' ']' '[' expr ']' •
+
+    $padrão  reduzir usando a regra 47 (matrix_twod)
+
+
+Estado 184
+
+   40 stmt_array: ID '[' expr ':' expr ']' • ASSIGN expr
+
+    ASSIGN  deslocar, e ir ao estado 191
+
+
+Estado 185
+
+   46 matrix_twod: '[' expr ']' '[' ']' •
+
+    $padrão  reduzir usando a regra 46 (matrix_twod)
+
+
+Estado 186
+
+   48 dms_acess: '[' expr • ']'
+   49          | '[' expr • ']' dms_acess
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ']'    deslocar, e ir ao estado 192
+
+
+Estado 187
+
+   63 condition: ID '(' args ')' ';' •
+
+    $padrão  reduzir usando a regra 63 (condition)
+
+
+Estado 188
+
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+   79 exp: ID '[' expr ':' expr • ']'
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+    ']'    deslocar, e ir ao estado 193
+
+
+Estado 189
+
+   37 elseif: ELSE IF condition • block elseif
+   59 condition: condition • AND condition
+   60          | condition • OR condition
+
+    AND  deslocar, e ir ao estado 110
+    OR   deslocar, e ir ao estado 111
+    '{'  deslocar, e ir ao estado 29
+
+    block  ir ao estado 194
+
+
+Estado 190
+
+   44 stmt_matrix: ID ':' MATRIX '[' expr ']' ASSIGN • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 195
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 191
+
+   40 stmt_array: ID '[' expr ':' expr ']' ASSIGN • expr
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 196
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 192
+
+   48 dms_acess: '[' expr ']' •
+   49          | '[' expr ']' • dms_acess
+
+    '['  deslocar, e ir ao estado 197
+
+    $padrão  reduzir usando a regra 48 (dms_acess)
+
+    dms_acess  ir ao estado 172
+
+
+Estado 193
+
+   79 exp: ID '[' expr ':' expr ']' •
+
+    $padrão  reduzir usando a regra 79 (exp)
+
+
+Estado 194
+
+   37 elseif: ELSE IF condition block • elseif
+
+    ELSE  deslocar, e ir ao estado 148
+
+    $padrão  reduzir usando a regra 39 (elseif)
+
+    elseif  ir ao estado 198
+
+
+Estado 195
+
+   44 stmt_matrix: ID ':' MATRIX '[' expr ']' ASSIGN expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 44 (stmt_matrix)
+
+
+Estado 196
+
+   40 stmt_array: ID '[' expr ':' expr ']' ASSIGN expr •
+   64 expr: expr • PLUS term
+   65     | expr • MINUS term
+
+    PLUS   deslocar, e ir ao estado 113
+    MINUS  deslocar, e ir ao estado 114
+
+    $padrão  reduzir usando a regra 40 (stmt_array)
+
+
+Estado 197
+
+   48 dms_acess: '[' • expr ']'
+   49          | '[' • expr ']' dms_acess
+
+    ID      deslocar, e ir ao estado 85
+    NUMBER  deslocar, e ir ao estado 64
+    FLOAT   deslocar, e ir ao estado 65
+    STRING  deslocar, e ir ao estado 66
+    BOOL    deslocar, e ir ao estado 86
+    '('     deslocar, e ir ao estado 69
+    '['     deslocar, e ir ao estado 70
+
+    dms     ir ao estado 71
+    expr    ir ao estado 186
+    term    ir ao estado 74
+    factor  ir ao estado 75
+    exp     ir ao estado 76
+
+
+Estado 198
+
+   37 elseif: ELSE IF condition block elseif •
+
+    $padrão  reduzir usando a regra 37 (elseif)

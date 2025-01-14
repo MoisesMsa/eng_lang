@@ -29,14 +29,7 @@ extern int yylineno;
 %token MATRIX
 %token STRUCT
 
-%right EXPOENT
-%right ASSIGN
-%left MULT DIVISION
-%left PLUS MINUS
-%left EQUALS DIFF LESS GREATER LESSEQUALS GREATEREQUALS
-%left AND
-%left OR
-%left NOT
+%left NOT AND OR
 
 %type <sValue> sub_programs sub_program stmt stmts_list structs declaration declarations
 %type <sValue> block param param_list dms condition
@@ -69,6 +62,7 @@ sub_programs : sub_programs sub_program {}
              ;
 
 sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {}
+            | FUNCTION ID '(' param_list ')' block {}
             ;
 
 param_list : param ',' param_list {}
@@ -77,7 +71,7 @@ param_list : param ',' param_list {}
 
 param : ID ':' TYPE {}
       | ID ':' TYPE dms {}
-      | {}
+      | %empty {}
       | ID ':' MATRIX {}
       ;
 
@@ -108,7 +102,7 @@ if_stmt : IF condition block elseif {}
 
 elseif : ELSE IF condition block elseif {}
        | ELSE block {}
-       | {}
+       | %empty {}
        ;
 
 stmt_array : ID '[' expr ':' expr ']' ASSIGN expr {} // slice de array
@@ -187,7 +181,7 @@ expr_list : expr {}
           | expr ',' expr_list {}
           ;
 
-args : {}
+args : %empty {}
      | expr {}
      | expr ',' args {}
      ;
