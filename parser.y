@@ -2,17 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "./includes/record.h"
 
 int yylex(void);
 int yyerror(char *s);
 extern char * yytext;
 extern int yylineno;
+
+char * cat(char *, char *, char *, char *, char *);
 %}
 
 // sera se vai ser preciso criar um union para arrays e matrizes? 
 // do tipo struct que vai ter linhas e colunas
 %union {
-    char *sValue;
+	char * sValue;  /* string value */
+	struct record * rec;
 };
 
 %token <sValue> ID
@@ -31,10 +35,10 @@ extern int yylineno;
 
 %left NOT AND OR
 
-%type <sValue> sub_programs sub_program stmt stmts_list structs declaration declarations
-%type <sValue> block param param_list dms condition
-%type <sValue> stmt_array stmt_matrix dms_acess matrix_twod
-%type <sValue> expr term factor exp expr_list args
+%type <rec> sub_programs sub_program stmt stmts_list structs declaration declarations
+%type <rec> block param param_list dms condition
+%type <rec> stmt_array stmt_matrix dms_acess matrix_twod
+%type <rec> expr term factor exp expr_list args
 
 %start program
 
@@ -52,21 +56,73 @@ declarations : declaration {}
              | declaration declarations {}
              ;
 
-declaration : ID ':' TYPE ';' {}
-            | ID ':' TYPE dms ';' {}
+declaration : ID ':' TYPE ';' {
+                $$ = createRecord($1, "");
+                free($1);
+              }
+            | ID ':' TYPE dms ';' {
+               //int matriz[valor]  
+               char * s1 = cat($3, " ", $1, $4->code, "");
+               printf("%s", s1);
+               free($3);
+               free($1);
+               free($4);
+               $$ = createRecord(s1, "");
+               free(s1);
+            }
             | ID ':' MATRIX ';' {}
             ;
 
-sub_programs : sub_programs sub_program {}
-             | sub_program {}
+//@todo add opção de vazio
+sub_programs : sub_programs sub_program {
+                char * s = cat($1->code, "\n", $2->code, "", "");
+                freeRecord($1);
+                freeRecord($2);
+                $$ = createRecord(s, "");
+                free(s);
+               }
+             | sub_program {
+                $$ = createRecord($1->code, "");
+                free($1);
+             }
              ;
 
-sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {}
-            | FUNCTION ID '(' param_list ')' block {}
+sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {
+               //int name(args) { code }
+               char * s1 = cat($7, " ", $2, "(", $4->code);
+               char * s2 = cat(s1, ")\n", "{\n", $8->code, "}");
+               free(s1);
+               free($7);
+               free($2);
+               freeRecord($4);
+               freeRecord($8);
+               $$ = createRecord(s2, "");
+               free(s2);
+             }
+            | FUNCTION ID '(' param_list ')' block {
+               //void name(args) { code }
+               char * s1 = cat("void", " ", $2, "(", $4->code);
+               char * s2 = cat(s1, ")\n", "{\n", $6->code, "}");
+               free(s1);
+               free($2);
+               freeRecord($4);
+               freeRecord($6);
+               $$ = createRecord(s2, "");
+               free(s2);
+            }
             ;
 
-param_list : param ',' param_list {}
-           | param {}
+param_list : param ',' param_list {
+               char * s = cat($1->code, ", ", $3->code, "", "");
+               free($1);
+               freeRecord($3);
+               $$ = createRecord(s, "");
+               free(s);
+           }
+           | param {
+               $$ = createRecord($1->code, "");
+               free($1);
+           }
            ;
 
 param : ID ':' TYPE {}
@@ -118,10 +174,11 @@ stmt_matrix : ID ':' MATRIX ASSIGN expr {} // matriz padrão com 2 dimensões
 matrix_twod : '[' expr ']' '[' ']' {} // aqui devolveria apenas a linha que ele quer, apenas para 2d
              | '[' ']' '[' expr ']' {} // aqui devolveria apenas a coluna que ele quer, apenas para 2d
              ;
+//@todo remover dms_access? ou por no formato ID[]
+dms_acess : ID '[' expr ']' {}
+          | ID '[' expr ']' dms_acess {}
 
-dms_acess : '[' expr ']' {}
-          | '[' expr ']' dms_acess {}
-
+//obs: a matriz precisa sempre ser declarada com um tamanho
 dms : '[' ']' {}
     | '[' ']' dms {}
     ;
@@ -195,4 +252,21 @@ int main(void) {
 int yyerror(char *msg){
      fprintf(stderr, "%d: %s at '%s'\n", yylineno, msg, yytext);
      return 0;
+}
+
+char * cat(char * s1, char * s2, char * s3, char * s4, char * s5){
+  int tam;
+  char * output;
+
+  tam = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5)+ 1;
+  output = (char *) malloc(sizeof(char) * tam);
+  
+  if (!output){
+    printf("Allocation problem. Closing application...\n");
+    exit(0);
+  }
+  
+  sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+  
+  return output;
 }
