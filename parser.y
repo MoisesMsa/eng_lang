@@ -112,18 +112,13 @@ sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {
             }
             ;
 
-param_list : param ',' param_list {
-               char * s = cat($1->code, ", ", $3->code, "", "");
-               free($1);
-               freeRecord($3);
-               $$ = createRecord(s, "");
-               free(s);
-           }
-           | param {
-               $$ = createRecord($1->code, "");
-               free($1);
-           }
-           ;
+param_list : param {
+
+          }
+          | param ',' param_list {
+             
+          }
+          ;
 
 param : ID ':' TYPE {}
       | ID ':' TYPE dms {}
