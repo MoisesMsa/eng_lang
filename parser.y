@@ -25,11 +25,11 @@ char * cat(char *, char *, char *, char *, char *);
 %token <sValue> STRING
 %token <sValue> TYPE
 %token <sValue> BOOL
-%token IF ELSE WHILE FOR IN ARROW ASSIGN FUNCTION
-%token PLUS MINUS MULT DIVISION EXPOENT
+%token <sValue> IF ELSE WHILE FOR IN ARROW ASSIGN FUNCTION
+%token <sValue> PLUS MINUS MULT DIVISION EXPOENT 
 %token AND OR NOT
 %token EQUALS DIFF LESS GREATER LESSEQUALS GREATEREQUALS
-%token INCREMENT DECREMENT INCREMENT_ASSIGN DECREMENT_ASSIGN
+%token <sValue> INCREMENT DECREMENT INCREMENT_ASSIGN DECREMENT_ASSIGN
 %token MATRIX
 %token STRUCT
 
@@ -113,28 +113,82 @@ sub_program : FUNCTION ID '(' param_list ')' ARROW TYPE block {
             ;
 
 param_list : param {
+                  $$ = createRecord($1->code, "");
+                  freeRecord($1);
+               }
+               | param ',' param_list {
+                    char *s = cat($1->code, ", ", $3->code, "", ""); 
+                    free($1);
+                    freeRecord($3);
+                    $$ = createRecord(s, "");
+                    free(s); 
+               }
+               ;
 
-          }
-          | param ',' param_list {
-             
-          }
-          ;
 
-param : ID ':' TYPE {}
-      | ID ':' TYPE dms {}
-      | %empty {}
-      | ID ':' MATRIX {}
+param : ID ':' TYPE {
+          //int a;
+          char *s = cat($3, " ", $1, "", "");
+          free($1);
+          free($3);
+          $$ = createRecord(s, "");
+          free(s);
+      }
+      | ID ':' TYPE dms {
+          //int a[1]
+          char *s = cat($3, $1, $4->code, "", "");
+          free($1);
+          free($3);
+          freeRecord($4);
+          $$ = createRecord(s, "");
+          free(s);
+      }
       ;
 
-block : '{' stmts_list '}' {}
+//@todo use lexer token in {}
+block : '{' stmts_list '}' {
+          char *s = cat("{", $2->code, "}", "", "");
+          //free($1);
+          //free($3);
+          freeRecord($2);
+          $$ = createRecord(s, "");
+          free(s);
+        }
       ;
 
-stmts_list : stmt {}
-           | stmt stmts_list {}
+stmts_list : stmt {
+              $$ = createRecord($1->code, "");
+              freeRecord($1);
+            }
+           | stmt stmts_list {
+              char *s = cat($1->code, $2->code, "", "", "");
+              freeRecord($1);
+              freeRecord($2);
+              $$ = createRecord(s, "");
+              free(s);
+           }
            ;
 
-stmt : ID ASSIGN expr ';' {}
-     | ID ':' TYPE ASSIGN expr ';' {}
+stmt : ID ASSIGN expr ';' {
+       //a = 10;
+       //c = false;
+       char *s = cat($1, $2, $3->code, ";", "");
+       free($1);
+       free($2);
+       freeRecord($3);
+       $$ = createRecord(s, "");
+       free(s);
+     }
+     //@todo remover 183 ja esta dentro do declarations
+     | ID ':' TYPE ASSIGN expr ';' {
+        //a : int = 10;
+        //char *s = cat($3, $1, "=", $5->code, "");
+        //free($1);
+        //free($3);
+        //freeRecord($5);
+        //$$ = createRecord(s, "");
+        //free(s);
+     }
      | ID INCREMENT ';' {}
      | ID DECREMENT ';' {}
      | ID INCREMENT_ASSIGN expr ';' {}
@@ -174,8 +228,19 @@ dms_acess : ID '[' expr ']' {}
           | ID '[' expr ']' dms_acess {}
 
 //obs: a matriz precisa sempre ser declarada com um tamanho
-dms : '[' ']' {}
-    | '[' ']' dms {}
+    dms : '[' ']' {
+      //[]
+      char *s = cat("[]", "", "", "", "");
+      $$ = createRecord(s, "");
+      free(s);
+    }
+    | '[' ']' dms {
+      //[][][]
+      char *s = cat("[]", $3->code, "", "", "");
+      freeRecord($3);
+      $$ = createRecord(s, "");
+      free(s);
+    }
     ;
 
 condition : expr LESS expr {}
@@ -196,14 +261,46 @@ condition : expr LESS expr {}
 // abordaremos as operacoes em matrizes de maneira individual? 
 // eu acho que pela tabela de simbolos, aqui da pra fazer a soma de matrizes identificando os tipos
 // assim nao precisando de um token especifico pra soma de matriz, ja que vamos disponibilizar como primitivo
-expr : expr PLUS term {}
-     | expr MINUS term {}
+expr : expr PLUS term {
+      //a + b
+      //1 + 1
+      char *s = cat($1->code, $2, $3->code, "", "");
+      freeRecord($1);
+      free($2);
+      freeRecord($3);
+      $$ = createRecord(s, "");
+      free(s);
+     }
+     | expr MINUS term {
+      char *s = cat($1->code, $2, $3->code, "", "");
+      freeRecord($1);
+      free($2);
+      freeRecord($3);
+      $$ = createRecord(s, "");
+      free(s);
+     }
      | term
      ;
 
 // o mesmo para multiplicacao de matrizes, temos que pensar apenas na regra da transposicao
-term : term MULT factor {}
-     | term DIVISION factor {}
+term : term MULT factor {
+        //a * b;
+        char *s = cat($1->code, $2, $3->code, "", "");
+        freeRecord($1);
+        free($2);
+        freeRecord($3);
+        $$ = createRecord(s, "");
+        free(s);
+     }
+     | term DIVISION factor {
+       //a/b
+        char *s = cat($1->code, $2, $3->code, "", "");
+        freeRecord($1);
+        free($2);
+        freeRecord($3);
+        $$ = createRecord(s, "");
+        free(s);
+     }
      | factor
      ;
 
@@ -213,19 +310,75 @@ factor : exp EXPOENT factor {}
 
 // falta abordar de passar uma matriz como por exemplo [[1,2][3,4]]
 // falta tratar o - unario
-exp : '(' expr ')' {}
-    | ID {}
-    | NUMBER {}
-    | FLOAT {}
-    | STRING {}
-    | BOOL {}
-    | ID dms_acess {} 
-    | ID '[' expr  ':' expr ']' {} // slice de array
-    | ID '(' args ')' {} // chamada de função
-    | '[' expr_list ']' {}
+exp : '(' expr ')' {
+      char *s = cat("(", $2->code, ")", "", "");
+      freeRecord($2);
+      $$ = createRecord(s, "");
+      free(s);
+    }
+    | ID {
+      $$ = createRecord($1, "");
+      //free($1);
+    }
+    | NUMBER {
+      $$ = createRecord($1, "");
+      //free($1);
+    }
+    | FLOAT {
+      $$ = createRecord($1, "");
+      //free($1);
+    }
+    | STRING {
+      $$ = createRecord($1, "");
+      //free($1);
+    }
+    | BOOL {
+      $$ = createRecord($1, "");
+      //free($1);
+    }
+    | ID dms_acess {
+      //a[i]
+      char *s = cat($1, $2->code, "", "", "");
+      free($1);
+      freeRecord($2);
+      $$ = createRecord($1, "");
+      free(s);
+    } 
+    | ID '[' expr  ':' expr ']' {
+      char *s = cat($1, "[", $3->code, "]", "");
+      free($1);
+      freeRecord($3);
+      $$ = createRecord(s, "");
+      free(s);
+    } // slice de array
+    | ID '(' args ')' {
+      char *s = cat($1, "(", $3->code, ")", "");
+      free($1);
+      freeRecord($3);
+      $$ = createRecord(s, "");
+      free(s);
+    } // chamada de função
+    | '[' expr_list ']' {
+      char *s = cat("[", $2->code, "]", "", "");
+      freeRecord($2);
+      $$ = createRecord(s, "");
+      free(s);
+    }
     | dms {}
-    | ID INCREMENT {}
-    | ID DECREMENT {}
+    | ID INCREMENT {
+      char *s = cat($1, $2, "", "", "");
+      free($1);
+      free($2);
+      $$ = createRecord(s, "");
+      free(s);
+    }
+    | ID DECREMENT {
+      char *s = cat($1, $2, "", "", "");
+      free($1);
+      free($2);
+      $$ = createRecord(s, "");
+      free(s);
+    }
     | ID matrix_twod {}
     ;
 
