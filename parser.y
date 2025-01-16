@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "./includes/record.h"
+#include "./includes/hashtable.h"
+#include "./includes/scope.h"
 
 int yylex(void);
 int yyerror(char *s);
@@ -10,7 +12,11 @@ extern char * yytext;
 extern int yylineno;
 
 char * cat(char *, char *, char *, char *, char *);
+char * generateKey(char *, char *);
 %}
+
+hash_table_base *symbol_table;
+stack_scope *stackScope;
 
 // sera se vai ser preciso criar um union para arrays e matrizes? 
 // do tipo struct que vai ter linhas e colunas
@@ -43,7 +49,7 @@ char * cat(char *, char *, char *, char *, char *);
 %start program
 
 %%
-
+// adicionar structs sub_programs
 program : sub_programs { }
         | structs {}
         ;
@@ -242,6 +248,9 @@ args : %empty {}
 
 int main(void) {
      return yyparse();
+     symbol_table = hashtable_create();
+     stackScope = scope_create();
+     scope_push(stackScope, "root");
 }
 
 int yyerror(char *msg){
@@ -264,4 +273,15 @@ char * cat(char * s1, char * s2, char * s3, char * s4, char * s5){
   sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
   
   return output;
+}
+
+char * generateKey(char * key, char * scope){
+     int tam = strlen(key) + strlen(scope) + 1;
+     char * output = (char *) malloc(sizeof(char) * tam);
+     if (!output){
+          printf("Allocation problem. Closing application...\n");
+          exit(0);
+     }
+     sprintf(output, "%s#%s", key, scope);
+     return output;
 }
