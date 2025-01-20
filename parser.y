@@ -12,12 +12,12 @@ int yyerror(char *s);
 extern char * yytext;
 extern int yylineno;
 
+hash_table_base *symbol_table;
+stack_scope *stackScope;
+
 char * cat(char *, char *, char *, char *, char *);
 char * generateKey(char *, char *);
 %}
-
-hash_table_base *symbol_table;
-stack_scope *stackScope;
 
 // sera se vai ser preciso criar um union para arrays e matrizes? 
 // do tipo struct que vai ter linhas e colunas

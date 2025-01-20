@@ -12,8 +12,8 @@ stack_scope *scope_create(){
 
 void scope_push(stack_scope *stack, const char *scope_id){
     scope *new = (scope *)malloc(sizeof(scope));
-    strcpy(new->scope_id, scope_id);
-    new->idx = stack->top->idx + 1;
+    new->scope_id = strdup(scope_id);
+    new->idx = (stack->top == NULL) ? 0 : stack->top->idx + 1;
     new->next = stack->top;
     stack->top = new;
 }
@@ -27,7 +27,6 @@ void scope_pop(stack_scope *stack){
     scope *rem = stack->top;
     stack->top = stack->top->next;
     free(rem->scope_id);
-    free(rem->idx);
     free(rem);
 }
 
@@ -66,7 +65,7 @@ char *scope_get(stack_scope *stack){
         if(scp == ""){
             sprintf(scp, "%s", aux->top->scope_id);
         } else {
-            sprintf(scp, "%s,%s", aux->top->scope_id, scp);
+            sprintf(scp, "%s%s", aux->top->scope_id, scp);
         }
         scope_pop(aux);
     }
