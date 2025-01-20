@@ -5,6 +5,7 @@
 #include "./includes/record.h"
 #include "./includes/hashtable.h"
 #include "./includes/scope.h"
+#include "./includes/label_generator.h"
 
 int yylex(void);
 int yyerror(char *s);
