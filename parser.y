@@ -6,6 +6,8 @@
 #include "./includes/hashtable.h"
 #include "./includes/scope.h"
 #include "./includes/label_generator.h"
+#include "./includes/function_hashtable.h"
+#include "./includes/type_hashtable.h"
 
 int yylex(void);
 int yyerror(char *s);
@@ -14,6 +16,9 @@ extern int yylineno;
 
 hash_table_base *symbol_table;
 stack_scope *stackScope;
+function_table *functionTable;
+type_table *typeTable;
+
 
 char * cat(char *, char *, char *, char *, char *);
 char * generateKey(char *, char *);
@@ -251,6 +256,8 @@ int main(void) {
      return yyparse();
      symbol_table = hashtable_create();
      stackScope = scope_create();
+     functionTable = function_table_create();
+     typeTable = type_table_create();
      scope_push(stackScope, "root");
 }
 
